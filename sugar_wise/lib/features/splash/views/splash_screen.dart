@@ -14,23 +14,22 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    // تشغيل العداد بمجرد بناء الشاشة
+
     _viewModel.startSplashTimer(context);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // خلفية بيضاء سادة كما في الصورة
       backgroundColor: Colors.white,
       body: SizedBox(
         width: double.infinity,
         child: Column(
           children: [
-            const Spacer(), // يدفع اللوجو إلى المنتصف
-            // 1. اللوجو (صورة التطبيق)
+            const Spacer(),
+
             Image.asset(
-              'assets/images/logo/logo.png', // ✅ تأكد من صحة مسار صورتك
+              'assets/images/logo/logo.png',
               width: 350,
               height: 350,
               fit: BoxFit.contain,
@@ -41,14 +40,13 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
             ),
 
-            const Spacer(), // يدفع الأنيميشن إلى الأسفل
-            // 2. الأنيميشن (الثلاث نقاط الملونة)
+            const Spacer(),
+
             Padding(
               padding: const EdgeInsets.only(bottom: 60.0),
               child: SpinKitThreeBounce(
-                size: 25.0, // حجم النقاط
+                size: 25.0,
                 itemBuilder: (BuildContext context, int index) {
-                  // تلوين النقاط لتطابق صورتك تماماً (أخضر، أزرق فاتح، أزرق غامق)
                   return DecoratedBox(
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
@@ -64,7 +62,6 @@ class _SplashScreenState extends State<SplashScreen> {
     );
   }
 
-  // دالة مساعدة لاختيار لون كل نقطة بناءً على ترتيبها
   Color _getDotColor(int index) {
     switch (index) {
       case 0:
@@ -80,17 +77,9 @@ class _SplashScreenState extends State<SplashScreen> {
 }
 
 class SplashViewModel {
-  // دالة تبدأ بمجرد فتح الشاشة
   void startSplashTimer(BuildContext context) {
     Future.delayed(const Duration(seconds: 3), () {
-      // التحقق من أن الشاشة ما زالت مفتوحة قبل الانتقال
       if (!context.mounted) return;
-
-      // الانتقال للشاشة التالية وإغلاق شاشة البداية تماماً (حتى لا يعود لها المستخدم بزر الرجوع)
-      // Navigator.pushReplacement(
-      //   context,
-      //   MaterialPageRoute(builder: (context) => const HomeScreen()),
-      // );
     });
   }
 }
