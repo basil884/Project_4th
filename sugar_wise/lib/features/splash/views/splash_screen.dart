@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:sugar_wise/features/welcome/welcome_first_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -80,6 +81,11 @@ class SplashViewModel {
   void startSplashTimer(BuildContext context) {
     Future.delayed(const Duration(seconds: 3), () {
       if (!context.mounted) return;
+      // الانتقال للشاشة التالية وإغلاق شاشة البداية تماماً (حتى لا يعود لها المستخدم بزر الرجوع)
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const WelcomeFirstScreen()),
+      );
     });
   }
 }
