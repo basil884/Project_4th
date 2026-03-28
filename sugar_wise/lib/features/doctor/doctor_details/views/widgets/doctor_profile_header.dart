@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sugar_wise/features/doctor/doctor_details/view_models/doctor_details_view_model.dart';
+import 'package:sugar_wise/features/patient/patient_chats/views/patient_chats_view.dart';
+import 'package:sugar_wise/features/patient/patient_chats/models/chat_thread_model.dart';
+import 'package:sugar_wise/features/patient/patient_chats/views/chat_view.dart';
 
 class DoctorProfileHeader extends StatelessWidget {
   const DoctorProfileHeader({super.key});
@@ -81,38 +84,27 @@ class DoctorProfileHeader extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 10),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.star, color: Colors.amber, size: 18),
-            const SizedBox(width: 5),
-            Text(
-              "${doctor.rating}",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: isDark ? Colors.white : Colors.black87,
-              ),
-            ),
-            const SizedBox(width: 5),
-            Text(
-              "(${doctor.reviewsCount} Reviews)",
-              style: const TextStyle(color: Colors.grey, fontSize: 12),
-            ),
-          ],
-        ),
-        const SizedBox(height: 20),
-
         // 4. الأزرار (Follow & Message)
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // زر المتابعة (يتغير لونه حسب الحالة)
             ElevatedButton(
-              onPressed: viewModel.toggleFollow,
+              onPressed: () {
+                viewModel.toggleFollow();
+                if (viewModel.isFollowing) {
+                  patientChatsViewModel.addDoctorToChats(
+                    doctorName: 'Dr. ${doctor.name}',
+                    doctorImage: doctor.imagePath,
+                    lastMessage: "You started following Dr. ${doctor.name}",
+                    doctorDetails:
+                        doctor, // ✅ أرسلنا بيانات الدكتور الحقيقية الكاملة هنا!
+                  );
+                }
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: viewModel.isFollowing
                     ? Colors.grey[300]
-                    : const Color(0xFF1976D2), // أزرق
+                    : const Color(0xFF1976D2),
                 foregroundColor: viewModel.isFollowing
                     ? Colors.black
                     : Colors.white,
@@ -131,12 +123,37 @@ class DoctorProfileHeader extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 15),
-            // زر المراسلة
+
             ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                // 1. إضافة الدكتور لقائمة المحادثات (إذا لم يكن موجوداً)
+                patientChatsViewModel.addDoctorToChats(
+                  doctorName: 'Dr. ${doctor.name}',
+                  doctorImage: doctor.imagePath,
+                  lastMessage: "New Conversation started...",
+                  doctorDetails: doctor,
+                );
+
+                // 2. تجهيز بيانات المحادثة الحالية للانتقال
+                final currentChat = ChatThreadModel(
+                  doctorId: doctor.name,
+                  doctorName: 'Dr. ${doctor.name}',
+                  doctorImage: doctor.imagePath,
+                  lastMessage: "New Conversation started...",
+                  realDoctorDetails: doctor,
+                );
+
+                // 3. السحر هنا 🪄: الانتقال الفعلي لشاشة المحادثة الخاصة بهذا الدكتور
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ChatView(chat: currentChat),
+                  ),
+                );
+              },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFE3F2FD), // أزرق فاتح
-                foregroundColor: const Color(0xFF1976D2), // نص أزرق
+                backgroundColor: const Color(0xFFE3F2FD),
+                foregroundColor: const Color(0xFF1976D2),
                 elevation: 0,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 30,

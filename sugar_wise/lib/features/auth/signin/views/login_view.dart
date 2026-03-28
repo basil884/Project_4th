@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sugar_wise/features/auth/view_modes/login_view_model.dart';
+import 'package:sugar_wise/features/auth/signin/view_models/login_view_model.dart';
 import 'widgets/login_header.dart';
 import 'widgets/login_form.dart';
 

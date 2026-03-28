@@ -36,10 +36,7 @@ class _PatientDashboardContent extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // 1. الهيدر
-                  DashboardHeader(
-                    userName: viewModel.userName,
-                    avatarPath: viewModel.userAvatar,
-                  ),
+                  DashboardHeader(),
                   const SizedBox(height: 15),
 
                   // 2. الترحيب (تم فصله لتنظيف الكود)

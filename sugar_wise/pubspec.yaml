@@ -39,11 +39,25 @@ dependencies:
   provider: ^6.1.5+1
   flutter_svg: ^2.2.4
   flutter_launcher_icons: ^0.14.4
+  image_picker: ^1.2.1
+  string_similarity: ^2.1.1
+  geolocator: ^14.0.2
+  geocoding: ^4.0.0
+  fl_chart: ^1.2.0
+  intl: ^0.20.2
+  pdf: ^3.12.0
+  printing: ^5.14.3
+  file_picker: ^10.3.10
+  open_filex: ^4.7.0
+  share_plus: ^12.0.1
+  path_provider: ^2.1.5
+  permission_handler: ^12.0.1
+  table_calendar: ^3.0.9
+
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  # رجعنا المكتبة دي لمكانها الصح عشان الإيرور يختفي
   flutter_lints: ^6.0.0
 
 # إعدادات الأيقونة بتكون بره في سطر لوحدها (بدون مسافات قبلها)
@@ -53,7 +67,7 @@ flutter_launcher_icons:
   image_path: "assets/images/logo/logo.png"
   min_sdk_android: 21
   adaptive_icon_background: "#FFFFFF"
-  adaptive_icon_foreground: "assets/images/logo/logo.png" # تم مسح المسافة الزائدة من هنا# For information on the generic Dart part of this file, see the
+  adaptive_icon_foreground: "assets/images/logo/logo.png" 
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.
@@ -69,6 +83,9 @@ flutter:
     - assets/images/logo/
     - assets/images/welcome/
     - assets/images/doctor/
+    - assets/images/insulation/
+    - assets/images/languagem/
+    - assets/images/support/
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

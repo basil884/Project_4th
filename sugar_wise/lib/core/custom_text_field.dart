@@ -8,6 +8,9 @@ class CustomTextField extends StatelessWidget {
   final bool obscureText;
   final VoidCallback? onSuffixTap;
 
+  // ✅ 1. يجب تعريف المتغير هنا أولاً
+  final TextEditingController? controller;
+
   const CustomTextField({
     super.key,
     required this.label,
@@ -16,6 +19,7 @@ class CustomTextField extends StatelessWidget {
     this.isPassword = false,
     this.obscureText = false,
     this.onSuffixTap,
+    this.controller, // ✅ 2. استقباله هنا باستخدام this
   });
 
   @override
@@ -28,22 +32,29 @@ class CustomTextField extends StatelessWidget {
           style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF37474F), // لون النص الداكن
+            color: Color(0xFF37474F),
           ),
         ),
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            color: Colors.grey[50], // خلفية الحقل الرمادية الفاتحة جداً
+            color: Colors.grey[50],
             borderRadius: BorderRadius.circular(12),
           ),
           child: TextField(
+            controller:
+                controller, // 🔥 3. السطر السحري! (بدونه لن يقرأ التطبيق أي حرف تكتبه)
             obscureText: obscureText,
+
+            // 💡 إضافة احترافية: إذا لم يكن باسوورد، نجعل الكيبورد مناسب للإيميلات
+            keyboardType: isPassword
+                ? TextInputType.text
+                : TextInputType.emailAddress,
+
             decoration: InputDecoration(
               hintText: hintText,
               hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
               prefixIcon: Icon(prefixIcon, color: Colors.grey[500], size: 20),
-              // إظهار أيقونة العين فقط إذا كان الحقل لكلمة المرور
               suffixIcon: isPassword
                   ? IconButton(
                       icon: Icon(

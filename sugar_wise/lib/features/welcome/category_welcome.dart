@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sugar_wise/features/auth/view/login_view.dart';
+import 'package:sugar_wise/features/auth/signin/views/login_view.dart';
 
 class ItemWelcome extends StatelessWidget {
   const ItemWelcome({

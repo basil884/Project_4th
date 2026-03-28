@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sugar_wise/features/welcome/category_welcome.dart';
-import 'package:sugar_wise/features/auth/view/login_view.dart';
+import 'package:sugar_wise/features/auth/signin/views/login_view.dart';
 
 class WelcomesecindScreen extends StatelessWidget {
   const WelcomesecindScreen({super.key});
