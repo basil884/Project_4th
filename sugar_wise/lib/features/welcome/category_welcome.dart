@@ -19,16 +19,25 @@ class ItemWelcome extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 🔥 استخراج حالة الثيم لضبط الألوان
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
+      backgroundColor: Theme.of(
+        context,
+      ).scaffoldBackgroundColor, // ✅ خلفية متجاوبة
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        title: const Text(
-          'Sugar Wise',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        elevation: 0, // ✅ إزالة الظل من الـ AppBar ليكون مسطحاً تماماً
+        title: Text(
+          ('Sugar Wise'),
+          style: TextStyle(
+            color: isDark ? Colors.white : Colors.black, // ✅ لون النص متجاوب
+            fontWeight: FontWeight.bold,
+          ),
         ),
         centerTitle: true,
       ),
-      backgroundColor: Colors.white,
       body: SafeArea(
         child: Stack(
           children: [
@@ -49,9 +58,11 @@ class ItemWelcome extends StatelessWidget {
                         );
                       },
                       child: Text(
-                        'Skip',
+                        ('Skip'),
                         style: TextStyle(
-                          color: Colors.grey[600],
+                          color: isDark
+                              ? Colors.grey[400]
+                              : Colors.grey[600], // ✅ لون زر التخطي متجاوب
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
                         ),
@@ -72,7 +83,13 @@ class ItemWelcome extends StatelessWidget {
                           fit: BoxFit.contain,
                           height: MediaQuery.of(context).size.height * 0.45,
                           errorBuilder: (context, error, stackTrace) {
-                            return Icon(Icons.person);
+                            return Icon(
+                              Icons.image_not_supported_outlined,
+                              size: 100,
+                              color: isDark
+                                  ? Colors.grey[700]
+                                  : Colors.grey[300],
+                            );
                           },
                         ),
                         const SizedBox(height: 30),
@@ -80,10 +97,14 @@ class ItemWelcome extends StatelessWidget {
                         Text(
                           textfirst,
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 26,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF333333),
+                            color: isDark
+                                ? Colors.white
+                                : const Color(
+                                    0xFF333333,
+                                  ), // ✅ لون العنوان متجاوب
                           ),
                         ),
                         const SizedBox(height: 15),
@@ -91,9 +112,11 @@ class ItemWelcome extends StatelessWidget {
                         Text(
                           description,
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 16,
-                            color: Color(0xFF757575),
+                            color: isDark
+                                ? Colors.grey[400]
+                                : const Color(0xFF757575), // ✅ لون الوصف متجاوب
                             height: 1.5,
                           ),
                         ),
@@ -122,16 +145,19 @@ class ItemWelcome extends StatelessWidget {
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF10B981), // لون أزرق
+                      backgroundColor: const Color(
+                        0xFF10B981,
+                      ), // ✅ لون أخضر مميز ثابت
+                      foregroundColor:
+                          Colors.white, // ✅ تأكيد أن لون النص أبيض دائماً
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
                       elevation: 0,
                     ),
                     child: Text(
-                      textbutton,
+                      (textbutton),
                       style: const TextStyle(
-                        color: Colors.white,
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),

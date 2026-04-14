@@ -16,13 +16,22 @@ class LanguageItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 🔥 استخراج حالة الثيم لضبط الألوان
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: selected
-            ? const Color(0xffEFF6FF).withOpacity(0.5)
-            : Colors.white,
+            ? (isDark
+                  ? Colors.blue.withValues(alpha: 0.15)
+                  : const Color(0xffEFF6FF).withValues(alpha: 0.5))
+            : Colors.transparent, // ✅ شفافة لتندمج مع لون الكارت الأب
         borderRadius: BorderRadius.circular(16),
+        // إطار خفيف جداً في الوضع المظلم للغات غير المحددة لتمييزها
+        border: isDark && !selected
+            ? Border.all(color: Colors.grey.shade800)
+            : null,
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -33,8 +42,10 @@ class LanguageItem extends StatelessWidget {
             children: [
               Text(
                 code,
-                style: const TextStyle(
-                  color: Color(0xff5D5FEF),
+                style: TextStyle(
+                  color: isDark
+                      ? const Color(0xff7F81F6)
+                      : const Color(0xff5D5FEF), // ✅ تفتيح بسيط للمظلم
                   fontWeight: FontWeight.bold,
                   fontSize: 14,
                 ),
@@ -49,7 +60,9 @@ class LanguageItem extends StatelessWidget {
             Text(
               name,
               style: TextStyle(
-                color: selected ? Colors.blue.shade700 : Colors.black87,
+                color: selected
+                    ? (isDark ? Colors.blue.shade300 : Colors.blue.shade700)
+                    : (isDark ? Colors.white : Colors.black87), // ✅ متجاوب
                 fontWeight: selected ? FontWeight.bold : FontWeight.w600,
                 fontSize: 16,
               ),
@@ -60,14 +73,20 @@ class LanguageItem extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
                 color: selected
-                    ? Colors.blue.withOpacity(0.1)
-                    : const Color(0xffF3E5F5),
+                    ? Colors.blue.withValues(alpha: isDark ? 0.2 : 0.1)
+                    : (isDark
+                          ? Colors.purple.withValues(alpha: 0.15)
+                          : const Color(0xffF3E5F5)), // ✅ متجاوب
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Text(
                 code,
                 style: TextStyle(
-                  color: selected ? Colors.blue : Colors.purple.shade400,
+                  color: selected
+                      ? (isDark ? Colors.blue.shade300 : Colors.blue)
+                      : (isDark
+                            ? Colors.purple.shade200
+                            : Colors.purple.shade400), // ✅ متجاوب
                   fontSize: 10,
                   fontWeight: FontWeight.bold,
                 ),
@@ -77,10 +96,19 @@ class LanguageItem extends StatelessWidget {
         ),
         subtitle: Text(
           nativeName,
-          style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+          style: TextStyle(
+            color: isDark
+                ? Colors.grey.shade400
+                : Colors.grey.shade500, // ✅ متجاوب
+            fontSize: 12,
+          ),
         ),
         trailing: selected
-            ? const Icon(Icons.check_circle, color: Colors.blue, size: 24)
+            ? Icon(
+                Icons.check_circle,
+                color: isDark ? Colors.blue.shade300 : Colors.blue,
+                size: 24,
+              ) // ✅ متجاوب
             : null,
       ),
     );

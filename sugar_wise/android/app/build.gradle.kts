@@ -7,7 +7,9 @@ plugins {
 
 android {
     namespace = "com.example.sugar_wise"
-    compileSdk = flutter.compileSdkVersion
+    
+    // 🔴 التعديل الأول: رفع إصدار الـ Compile إلى 34
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -22,10 +24,10 @@ android {
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.example.sugar_wise"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
+        
+        // 🔴 التعديل الثاني والأهم: رفع الحد الأدنى إلى 21 والهدف إلى 34
         minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        targetSdk = 34
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }

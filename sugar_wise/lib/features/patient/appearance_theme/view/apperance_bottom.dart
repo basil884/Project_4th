@@ -5,9 +5,9 @@ class SaveButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton.icon( 
+    return ElevatedButton.icon(
       onPressed: () {},
-      icon: const Icon(Icons.save), 
+      icon: const Icon(Icons.save),
       label: const Text(
         "Save Changes",
         style: TextStyle(fontWeight: FontWeight.bold),
@@ -17,7 +17,7 @@ class SaveButton extends StatelessWidget {
         foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         elevation: 5,
-        shadowColor: Colors.blue.withOpacity(0.4),
+        shadowColor: Colors.blue.withValues(alpha: 0.4),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );

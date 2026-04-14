@@ -54,17 +54,25 @@ class _ChangPassPatientState extends State<ChangPassPatient> {
 
   @override
   Widget build(BuildContext context) {
+    // 🔥 استخراج حالة الثيم لضبط الألوان
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.black87;
+
     return Scaffold(
+      backgroundColor: Theme.of(
+        context,
+      ).scaffoldBackgroundColor, // ✅ خلفية متجاوبة
       appBar: AppBar(
-        title: const Text(
-          'Change Password',
-          style: TextStyle(color: Colors.black),
+        title: Text(
+          ('Change Password'),
+          style: TextStyle(color: textColor), // ✅ نص متجاوب
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(
+          context,
+        ).scaffoldBackgroundColor, // ✅ خلفية متجاوبة
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black),
+        iconTheme: IconThemeData(color: textColor), // ✅ لون الأيقونة متجاوب
       ),
-      backgroundColor: Colors.white,
       body: SafeArea(
         child: Form(
           key: _formKey, // ربط الفورم بالمفتاح
@@ -80,22 +88,28 @@ class _ChangPassPatientState extends State<ChangPassPatient> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        "Your new password must be different from your \npreviously used passwords",
-                        style: TextStyle(color: Colors.grey, height: 1.5),
+                      Text(
+                        ("Your new password must be different from your \npreviously used passwords"),
+                        style: TextStyle(
+                          color: isDark
+                              ? Colors.grey.shade400
+                              : Colors.grey, // ✅ لون متجاوب
+                          height: 1.5,
+                        ),
                       ),
                       const SizedBox(height: 32),
 
                       // 1. حقل كلمة المرور القديمة
                       _buildPasswordField(
-                        label: "Enter old password",
+                        label: ("Enter old password"),
                         controller: _oldPassCtrl,
                         obscureText: _obscureOld,
+                        isDark: isDark, // ✅ تمرير الثيم
                         onToggleVisibility: () =>
                             setState(() => _obscureOld = !_obscureOld),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return "Please enter your old password";
+                            return ("Please enter your old password");
                           }
                           return null;
                         },
@@ -103,18 +117,19 @@ class _ChangPassPatientState extends State<ChangPassPatient> {
 
                       // 2. حقل كلمة المرور الجديدة
                       _buildPasswordField(
-                        label: "Enter new password",
+                        label: ("Enter new password"),
                         controller: _newPassCtrl,
                         obscureText: _obscureNew,
+                        isDark: isDark, // ✅ تمرير الثيم
                         onToggleVisibility: () =>
                             setState(() => _obscureNew = !_obscureNew),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return "Please enter a new password";
+                            return ("Please enter a new password");
                           } else if (value.length < 8) {
-                            return "Password must be at least 8 characters long";
+                            return ("Password must be at least 8 characters long");
                           } else if (value == _oldPassCtrl.text) {
-                            return "New password must be different from the old one"; // شرط الاختلاف
+                            return ("New password must be different from the old one"); // شرط الاختلاف
                           }
                           return null;
                         },
@@ -122,16 +137,17 @@ class _ChangPassPatientState extends State<ChangPassPatient> {
 
                       // 3. حقل تأكيد كلمة المرور الجديدة
                       _buildPasswordField(
-                        label: "Confirm new password",
+                        label: ("Confirm new password"),
                         controller: _confirmPassCtrl,
                         obscureText: _obscureConfirm,
+                        isDark: isDark, // ✅ تمرير الثيم
                         onToggleVisibility: () =>
                             setState(() => _obscureConfirm = !_obscureConfirm),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return "Please confirm your new password";
+                            return ("Please confirm your new password");
                           } else if (value != _newPassCtrl.text) {
-                            return "Passwords do not match"; // شرط التطابق
+                            return (("Passwords do not match")); // شرط التطابق
                           }
                           return null;
                         },
@@ -150,17 +166,18 @@ class _ChangPassPatientState extends State<ChangPassPatient> {
                             ),
                           ),
                           onPressed: _updatePassword, // تفعيل دالة الفحص
-                          child: const Row(
+                          child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(
+                              const Icon(
                                 Icons.check_circle_outline,
                                 color: Colors.white,
+                                size: 20,
                               ),
-                              SizedBox(width: 8),
+                              const SizedBox(width: 8),
                               Text(
-                                "Update Password",
-                                style: TextStyle(
+                                ("Update Password"),
+                                style: const TextStyle(
                                   fontSize: 16,
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
@@ -188,6 +205,7 @@ class _ChangPassPatientState extends State<ChangPassPatient> {
     required bool obscureText,
     required VoidCallback onToggleVisibility,
     required String? Function(String?) validator,
+    required bool isDark, // ✅ استقبال الثيم
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 22),
@@ -195,17 +213,38 @@ class _ChangPassPatientState extends State<ChangPassPatient> {
         controller: controller,
         obscureText: obscureText,
         validator: validator, // دالة التحقق من الشروط
+        style: TextStyle(
+          color: isDark ? Colors.white : Colors.black87,
+        ), // ✅ لون النص المُدخل متجاوب
         decoration: InputDecoration(
           labelText: label,
+          labelStyle: TextStyle(
+            color: isDark ? Colors.grey.shade400 : Colors.grey.shade700,
+          ), // ✅ لون الـ Label متجاوب
           hintText: label,
+          hintStyle: TextStyle(
+            color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
+          ),
           suffixIcon: IconButton(
             icon: Icon(
               obscureText ? Icons.visibility_off : Icons.visibility,
-              color: Colors.grey,
+              color: isDark ? Colors.grey.shade500 : Colors.grey, // ✅ متجاوب
             ),
             onPressed: onToggleVisibility, // تغيير حالة الإظهار والإخفاء
           ),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          // ✅ إطار متجاوب مع الثيم
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: isDark ? Colors.grey.shade700 : Colors.grey.shade400,
+            ),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: isDark ? Colors.grey.shade700 : Colors.grey.shade300,
+            ),
+          ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: const BorderSide(color: Color(0xff2f66d0), width: 1.5),

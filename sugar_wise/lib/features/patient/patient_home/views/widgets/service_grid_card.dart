@@ -68,7 +68,7 @@ class ServiceGridCard extends StatelessWidget {
                   const Spacer(),
 
                   Text(
-                    card.title,
+                    (card.title),
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -78,7 +78,7 @@ class ServiceGridCard extends StatelessWidget {
                   const SizedBox(height: 4),
 
                   Text(
-                    card.description,
+                    (card.description),
                     style: TextStyle(
                       fontSize: 12,
                       color: isDark ? Colors.grey[400] : Colors.grey[600],

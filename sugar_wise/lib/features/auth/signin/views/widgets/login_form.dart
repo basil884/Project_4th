@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:sugar_wise/core/custom_text_field.dart';
 import 'package:sugar_wise/features/auth/register/ask_registration/views/register_view.dart';
 import 'package:sugar_wise/features/auth/signin/view_models/login_view_model.dart';
-import 'package:sugar_wise/features/patient/patient_home/views/patient_main_layout.dart';
+import 'package:sugar_wise/features/patient/bluetooth_scanner/view/connect_sensor_view.dart';
 
-// ✅ تم التحويل إلى StatefulWidget للتعامل مع الـ Controllers بأمان
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
 
@@ -14,13 +14,38 @@ class LoginForm extends StatefulWidget {
 }
 
 class _LoginFormState extends State<LoginForm> {
-  // 🔥 تعريف الـ Controllers لقراءة الإدخال
+  // تهيئة مساحة التخزين الآمنة
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage(
+    aOptions: AndroidOptions(),
+  );
+
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
+  bool _rememberMe = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedCredentials();
+  }
+
+  // استرجاع البيانات عند فتح الشاشة
+  Future<void> _loadSavedCredentials() async {
+    String? savedEmail = await _secureStorage.read(key: 'email');
+    String? savedPassword = await _secureStorage.read(key: 'password');
+
+    if (savedEmail != null && savedPassword != null) {
+      setState(() {
+        _emailController.text = savedEmail;
+        _passwordController.text = savedPassword;
+        _rememberMe = true;
+      });
+    }
+  }
+
   @override
   void dispose() {
-    // تنظيف الذاكرة عند إغلاق الشاشة
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -29,32 +54,40 @@ class _LoginFormState extends State<LoginForm> {
   @override
   Widget build(BuildContext context) {
     final viewModel = Provider.of<LoginViewModel>(context);
-    const Color primaryGreen = Color(0xFF10B981); // اللون الأخضر للأزرار
+    const Color primaryGreen = Color(0xFF10B981);
+
+    // 🔥 استخراج حالة الثيم
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor, // ✅ لون الكارت يتجاوب مع الثيم
         borderRadius: BorderRadius.circular(20),
+        border: isDark
+            ? Border.all(color: Colors.grey.shade800)
+            : null, // إطار خفيف للمظلم
         boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.05), // ظل خفيف جداً
-            blurRadius: 20,
-            spreadRadius: 5,
-          ),
+          if (!isDark) // ✅ إخفاء الظل في الوضع المظلم
+            BoxShadow(
+              color: Colors.grey.withValues(alpha: 0.05),
+              blurRadius: 20,
+              spreadRadius: 5,
+            ),
         ],
       ),
       child: Column(
         children: [
+          // ⚠️ ملاحظة: تأكد أن ملف CustomTextField يدعم الوضع المظلم أيضاً (تغيير لون النص والخلفية بداخله)
           CustomTextField(
-            controller: _emailController, // ✅ ربط الإيميل
+            controller: _emailController,
             label: "Email Address",
             hintText: "you@example.com",
             prefixIcon: Icons.email_outlined,
           ),
           const SizedBox(height: 20),
           CustomTextField(
-            controller: _passwordController, // ✅ ربط الباسوورد
+            controller: _passwordController,
             label: "Password",
             hintText: "••••••••",
             prefixIcon: Icons.lock_outline,
@@ -63,34 +96,69 @@ class _LoginFormState extends State<LoginForm> {
             onSuffixTap: viewModel.togglePasswordVisibility,
           ),
           const SizedBox(height: 10),
-          // Forgot Password
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton(
-              onPressed: () {},
-              child: const Text(
-                "Forgot password?",
-                style: TextStyle(
-                  color: primaryGreen,
-                  fontWeight: FontWeight.bold,
+
+          // 🔥 دمجنا "تذكرني" مع "نسيت كلمة المرور" في سطر واحد أنيق
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: Checkbox(
+                      value: _rememberMe,
+                      activeColor: primaryGreen,
+                      side: BorderSide(
+                        color: isDark
+                            ? Colors.grey.shade500
+                            : Colors.grey.shade600, // ✅ تحديد مربع الاختيار
+                      ),
+                      onChanged: (value) {
+                        setState(() {
+                          _rememberMe = value ?? false;
+                        });
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    "Remember me",
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: isDark
+                          ? Colors.grey.shade400
+                          : Colors.grey, // ✅ لون النص متجاوب
+                    ),
+                  ),
+                ],
+              ),
+              TextButton(
+                onPressed: () {},
+                child: const Text(
+                  "Forgot password?",
+                  style: TextStyle(
+                    color: primaryGreen,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                  ),
                 ),
               ),
-            ),
+            ],
           ),
           const SizedBox(height: 15),
 
-          // 🔥 Sign In Button (التوجيه الذكي)
+          // 🔥 Sign In Button
           SizedBox(
             width: double.infinity,
             height: 55,
             child: ElevatedButton(
               onPressed: viewModel.isLoading
-                  ? null // تعطيل الزر أثناء التحميل لمنع التكرار
+                  ? null
                   : () async {
                       final email = _emailController.text.trim();
                       final password = _passwordController.text;
 
-                      // 1. التحقق من أن الحقول غير فارغة
                       if (email.isEmpty || password.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
@@ -98,36 +166,51 @@ class _LoginFormState extends State<LoginForm> {
                               "Please enter both email and password",
                             ),
                             backgroundColor: Colors.redAccent,
-                            behavior: SnackBarBehavior.floating,
                           ),
                         );
                         return;
                       }
 
-                      // 2. استدعاء العقل المدبر للتحقق من الحساب
+                      // 1. الدخول عبر ViewModel
                       final role = await viewModel.login(email, password);
 
-                      // 3. التأكد من أن الشاشة لا تزال مفتوحة
                       if (!context.mounted) return;
 
-                      // 4. التوجيه بناءً على نوع الحساب
+                      // 2. إذا نجح الدخول، نقوم بتفعيل أو إلغاء "تذكرني"
+                      if (role != null) {
+                        if (_rememberMe) {
+                          await _secureStorage.write(
+                            key: 'email',
+                            value: email,
+                          );
+                          await _secureStorage.write(
+                            key: 'password',
+                            value: password,
+                          );
+                        } else {
+                          await _secureStorage.delete(key: 'email');
+                          await _secureStorage.delete(key: 'password');
+                        }
+                      }
+
+                      // 3. التوجيه
                       if (role == 'patient') {
-                        // 👨‍🦱 توجيه المريض لشاشته
+                        if (!context.mounted) return;
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const PatientMain(),
+                            builder: (context) => const ConnectSensorView(),
                           ),
                         );
                       } else if (role == 'doctor') {
-                        // 👨‍⚕️ توجيه الطبيب لشاشته (مؤقتة حتى تبنيها)
+                        if (!context.mounted) return;
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
                             builder: (context) => const Scaffold(
                               body: Center(
                                 child: Text(
-                                  "Doctor Dashboard\n(Coming Soon!)",
+                                  "👨‍⚕️ Doctor Dashboard\n(Coming Soon!)",
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     fontSize: 24,
@@ -139,14 +222,13 @@ class _LoginFormState extends State<LoginForm> {
                           ),
                         );
                       } else {
-                        // ❌ البيانات خاطئة، نعرض الخطأ
+                        if (!context.mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
                               viewModel.errorMessage ?? "Invalid credentials",
                             ),
                             backgroundColor: Colors.redAccent,
-                            behavior: SnackBarBehavior.floating,
                           ),
                         );
                       }
@@ -181,12 +263,27 @@ class _LoginFormState extends State<LoginForm> {
           // Divider (OR)
           Row(
             children: [
-              Expanded(child: Divider(color: Colors.grey[300], thickness: 1)),
+              Expanded(
+                child: Divider(
+                  color: isDark ? Colors.grey.shade800 : Colors.grey[300],
+                  thickness: 1,
+                ),
+              ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: Text("or", style: TextStyle(color: Colors.grey[400])),
+                child: Text(
+                  "or",
+                  style: TextStyle(
+                    color: isDark ? Colors.grey.shade500 : Colors.grey[400],
+                  ),
+                ),
               ),
-              Expanded(child: Divider(color: Colors.grey[300], thickness: 1)),
+              Expanded(
+                child: Divider(
+                  color: isDark ? Colors.grey.shade800 : Colors.grey[300],
+                  thickness: 1,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 25),
@@ -197,10 +294,15 @@ class _LoginFormState extends State<LoginForm> {
               MaterialPageRoute(builder: (context) => const RegisterView()),
             ),
             child: RichText(
-              text: const TextSpan(
+              text: TextSpan(
                 text: "Don't have an account? ",
-                style: TextStyle(color: Colors.grey, fontSize: 14),
-                children: [
+                style: TextStyle(
+                  color: isDark
+                      ? Colors.grey.shade400
+                      : Colors.grey, // ✅ لون النص متجاوب
+                  fontSize: 14,
+                ),
+                children: const [
                   TextSpan(
                     text: "Sign up",
                     style: TextStyle(

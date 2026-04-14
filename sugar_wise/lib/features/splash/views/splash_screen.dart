@@ -22,7 +22,8 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      // ✅ السحر هنا: جعل لون الخلفية يتجاوب مع الثيم الفاتح والمظلم
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SizedBox(
         width: double.infinity,
         child: Column(
@@ -34,10 +35,13 @@ class _SplashScreenState extends State<SplashScreen> {
               width: 350,
               height: 350,
               fit: BoxFit.contain,
-              errorBuilder: (context, error, stackTrace) => const Icon(
+              errorBuilder: (context, error, stackTrace) => Icon(
                 Icons.image_not_supported,
                 size: 100,
-                color: Colors.grey,
+                // ✅ لون الأيقونة الاحتياطية يتجاوب مع الثيم
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.grey[700]
+                    : Colors.grey,
               ),
             ),
 

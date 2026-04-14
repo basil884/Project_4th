@@ -12,15 +12,21 @@ class MonitoringView extends StatelessWidget {
   Widget build(BuildContext context) {
     final viewModel = Provider.of<MonitoringViewModel>(context);
 
+    // 🔥 استخراج حالة الثيم لضبط الألوان
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : const Color(0xFF1D2939);
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: Theme.of(
+        context,
+      ).scaffoldBackgroundColor, // ✅ خلفية متجاوبة
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildChartCard(context, viewModel),
+              _buildChartCard(context, viewModel, isDark),
               const SizedBox(height: 25),
               SizedBox(
                 width: double.infinity,
@@ -32,7 +38,7 @@ class MonitoringView extends StatelessWidget {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
-                    elevation: 5,
+                    elevation: isDark ? 0 : 5, // إخفاء الظل القوي في المظلم
                     shadowColor: const Color(0xFF2F66D0).withValues(alpha: 0.4),
                   ),
                   icon: const Icon(Icons.add, color: Colors.white),
@@ -50,12 +56,12 @@ class MonitoringView extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     "Recent Readings",
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w900,
-                      color: Color(0xFF1D2939),
+                      color: textColor, // ✅ متجاوب
                     ),
                   ),
                   TextButton(
@@ -71,7 +77,11 @@ class MonitoringView extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 10),
-              _buildRecentReadingsList(viewModel.recentReadings),
+              _buildRecentReadingsList(
+                viewModel.recentReadings,
+                isDark,
+                context,
+              ),
             ],
           ),
         ),
@@ -79,19 +89,27 @@ class MonitoringView extends StatelessWidget {
     );
   }
 
-  Widget _buildChartCard(BuildContext context, MonitoringViewModel viewModel) {
+  Widget _buildChartCard(
+    BuildContext context,
+    MonitoringViewModel viewModel,
+    bool isDark,
+  ) {
+    final textColor = isDark ? Colors.white : Colors.black87;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor, // ✅ متجاوب
         borderRadius: BorderRadius.circular(20),
+        border: isDark ? Border.all(color: Colors.grey.shade800) : null,
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 15,
-            offset: const Offset(0, 5),
-          ),
+          if (!isDark) // ✅ إخفاء الظل في الوضع المظلم
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 15,
+              offset: const Offset(0, 5),
+            ),
         ],
       ),
       child: Column(
@@ -100,7 +118,7 @@ class MonitoringView extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Column(
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
@@ -108,12 +126,15 @@ class MonitoringView extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w900,
-                      color: Colors.black87,
+                      color: textColor, // ✅ متجاوب
                     ),
                   ),
                   Text(
                     "Glucose Analysis Report",
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isDark ? Colors.grey.shade400 : Colors.grey,
+                    ),
                   ),
                 ],
               ),
@@ -129,7 +150,9 @@ class MonitoringView extends StatelessWidget {
                   style: TextStyle(color: Color(0xFFE65100), fontSize: 12),
                 ),
                 style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: Colors.grey.shade300),
+                  side: BorderSide(
+                    color: isDark ? Colors.grey.shade700 : Colors.grey.shade300,
+                  ), // ✅ متجاوب
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -147,16 +170,21 @@ class MonitoringView extends StatelessWidget {
             children: [
               Text(
                 "Glucose Trends (${viewModel.selectedFilter})",
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: textColor, // ✅ متجاوب
                 ),
               ),
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
+                  color: isDark
+                      ? Colors.grey.shade900
+                      : Colors.grey.shade100, // ✅ متجاوب
                   borderRadius: BorderRadius.circular(8),
+                  border: isDark
+                      ? Border.all(color: Colors.grey.shade800)
+                      : null,
                 ),
                 child: Row(
                   children: ["Day", "Week", "Mo"].map((filter) {
@@ -169,9 +197,11 @@ class MonitoringView extends StatelessWidget {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: isSelected ? Colors.white : Colors.transparent,
+                          color: isSelected
+                              ? (isDark ? Colors.grey.shade800 : Colors.white)
+                              : Colors.transparent, // ✅ متجاوب
                           borderRadius: BorderRadius.circular(8),
-                          boxShadow: isSelected
+                          boxShadow: isSelected && !isDark
                               ? [
                                   BoxShadow(
                                     color: Colors.black.withValues(alpha: 0.05),
@@ -187,7 +217,9 @@ class MonitoringView extends StatelessWidget {
                             fontWeight: isSelected
                                 ? FontWeight.bold
                                 : FontWeight.w500,
-                            color: isSelected ? Colors.black : Colors.grey,
+                            color: isSelected
+                                ? (isDark ? Colors.white : Colors.black)
+                                : Colors.grey, // ✅ متجاوب
                           ),
                         ),
                       ),
@@ -206,8 +238,10 @@ class MonitoringView extends StatelessWidget {
                   show: true,
                   drawVerticalLine: false,
                   horizontalInterval: 40,
-                  getDrawingHorizontalLine: (value) =>
-                      FlLine(color: Colors.grey.shade200, strokeWidth: 1),
+                  getDrawingHorizontalLine: (value) => FlLine(
+                    color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+                    strokeWidth: 1,
+                  ), // ✅ شبكة الرسم البياني متجاوبة
                 ),
                 titlesData: FlTitlesData(
                   show: true,
@@ -227,8 +261,10 @@ class MonitoringView extends StatelessWidget {
                       reservedSize: 32, // ✅ تم تكبير المساحة لتجنب الخطأ
                       interval: 2, // ✅ تحديد المسافات برمجياً بذكاء
                       getTitlesWidget: (value, meta) {
-                        const style = TextStyle(
-                          color: Colors.grey,
+                        final style = TextStyle(
+                          color: isDark
+                              ? Colors.grey.shade400
+                              : Colors.grey, // ✅ لون خطوط المحور متجاوب
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
                         );
@@ -252,7 +288,6 @@ class MonitoringView extends StatelessWidget {
                           default:
                             return const SizedBox.shrink();
                         }
-                        // 🔥 السحر هنا: تغليف النص بـ SideTitleWidget هو ما يمنع الكراش تماماً!
                         // 🔥 السحر هنا: تغليف النص بـ SideTitleWidget هو ما يمنع الكراش تماماً!
                         return SideTitleWidget(
                           meta:
@@ -289,8 +324,9 @@ class MonitoringView extends StatelessWidget {
                 ],
                 lineTouchData: LineTouchData(
                   touchTooltipData: LineTouchTooltipData(
-                    getTooltipColor: (LineBarSpot touchedSpot) =>
-                        const Color(0xFF1D2939),
+                    getTooltipColor: (LineBarSpot touchedSpot) => isDark
+                        ? Colors.grey.shade800
+                        : const Color(0xFF1D2939), // ✅ لون الـ Tooltip
                     getTooltipItems: (touchedSpots) {
                       return touchedSpots
                           .map(
@@ -315,12 +351,18 @@ class MonitoringView extends StatelessWidget {
     );
   }
 
-  Widget _buildRecentReadingsList(List<SugarReading> readings) {
+  Widget _buildRecentReadingsList(
+    List<SugarReading> readings,
+    bool isDark,
+    BuildContext context,
+  ) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor, // ✅ متجاوب
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade100),
+        border: Border.all(
+          color: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
+        ), // ✅ متجاوب
       ),
       child: Column(
         children: [
@@ -335,7 +377,9 @@ class MonitoringView extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
-                      color: Colors.grey.shade400,
+                      color: isDark
+                          ? Colors.grey.shade500
+                          : Colors.grey.shade400,
                     ),
                   ),
                 ),
@@ -346,7 +390,9 @@ class MonitoringView extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
-                      color: Colors.grey.shade400,
+                      color: isDark
+                          ? Colors.grey.shade500
+                          : Colors.grey.shade400,
                     ),
                   ),
                 ),
@@ -357,21 +403,28 @@ class MonitoringView extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
-                      color: Colors.grey.shade400,
+                      color: isDark
+                          ? Colors.grey.shade500
+                          : Colors.grey.shade400,
                     ),
                   ),
                 ),
               ],
             ),
           ),
-          Divider(height: 1, color: Colors.grey.shade100),
-          ...readings.map((reading) => _buildReadingRow(reading)),
+          Divider(
+            height: 1,
+            color: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
+          ),
+          ...readings.map((reading) => _buildReadingRow(reading, isDark)),
         ],
       ),
     );
   }
 
-  Widget _buildReadingRow(SugarReading reading) {
+  Widget _buildReadingRow(SugarReading reading, bool isDark) {
+    final textColor = isDark ? Colors.white : Colors.black87;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
       child: Row(
@@ -380,9 +433,9 @@ class MonitoringView extends StatelessWidget {
             flex: 2,
             child: Text(
               reading.time,
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.w600,
-                color: Colors.black87,
+                color: textColor, // ✅ متجاوب
               ),
             ),
           ),
@@ -392,16 +445,19 @@ class MonitoringView extends StatelessWidget {
               children: [
                 Text(
                   "${reading.value}",
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w900,
                     fontSize: 16,
-                    color: Colors.black87,
+                    color: textColor, // ✅ متجاوب
                   ),
                 ),
                 const SizedBox(width: 4),
-                const Text(
+                Text(
                   "mg/dL",
-                  style: TextStyle(color: Colors.grey, fontSize: 10),
+                  style: TextStyle(
+                    color: isDark ? Colors.grey.shade500 : Colors.grey,
+                    fontSize: 10,
+                  ),
                 ),
               ],
             ),
@@ -416,13 +472,22 @@ class MonitoringView extends StatelessWidget {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: reading.statusColor.withValues(alpha: 0.15),
+                  color: reading.statusColor.withValues(
+                    alpha: isDark ? 0.2 : 0.15,
+                  ), // تعميق قليلاً
                   borderRadius: BorderRadius.circular(20),
+                  border: isDark
+                      ? Border.all(
+                          color: reading.statusColor.withValues(alpha: 0.5),
+                        )
+                      : null,
                 ),
                 child: Text(
                   reading.status,
                   style: TextStyle(
-                    color: reading.statusColor,
+                    color: isDark
+                        ? _getBrighterColor(reading.statusColor)
+                        : reading.statusColor, // تفتيح النص ليظهر في المظلم
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
                   ),
@@ -432,6 +497,16 @@ class MonitoringView extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  // دالة صغيرة لجعل الألوان أوضح في الوضع المظلم
+  Color _getBrighterColor(Color color) {
+    return Color.fromARGB(
+      color.a.toInt(),
+      (color.r + (255 - color.r) * 0.2).toInt(),
+      (color.g + (255 - color.g) * 0.2).toInt(),
+      (color.b + (255 - color.b) * 0.2).toInt(),
     );
   }
 
@@ -457,13 +532,18 @@ class MonitoringView extends StatelessWidget {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) {
+        // 🔥 استخراج حالة الثيم للـ BottomSheet
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+
         return StatefulBuilder(
           builder: (context, setModalState) {
             return Container(
               height: MediaQuery.of(context).size.height * 0.85,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+              decoration: BoxDecoration(
+                color: Theme.of(context).scaffoldBackgroundColor, // ✅ متجاوب
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(25),
+                ),
               ),
               child: Column(
                 children: [
@@ -472,22 +552,32 @@ class MonitoringView extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
+                        Text(
                           "Add New Health Log",
                           style: TextStyle(
                             fontWeight: FontWeight.w900,
                             fontSize: 18,
-                            color: Color(0xFF1D2939),
+                            color: isDark
+                                ? Colors.white
+                                : const Color(0xFF1D2939), // ✅ متجاوب
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.close, color: Colors.blueGrey),
+                          icon: Icon(
+                            Icons.close,
+                            color: isDark
+                                ? Colors.grey.shade400
+                                : Colors.blueGrey,
+                          ),
                           onPressed: () => Navigator.pop(context),
                         ),
                       ],
                     ),
                   ),
-                  Divider(height: 1, color: Colors.grey.shade100),
+                  Divider(
+                    height: 1,
+                    color: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
+                  ),
 
                   Expanded(
                     child: SingleChildScrollView(
@@ -501,8 +591,10 @@ class MonitoringView extends StatelessWidget {
                               Expanded(
                                 flex: 3,
                                 child: _buildLogInputField(
+                                  context,
                                   "GLUCOSE LEVEL",
                                   "e.g., 120",
+                                  isDark: isDark,
                                   prefixIcon: Icons.water_drop_outlined,
                                   controller: glucoseCtrl,
                                   hasError: isGlucoseEmptyError,
@@ -513,11 +605,13 @@ class MonitoringView extends StatelessWidget {
                               Expanded(
                                 flex: 2,
                                 child: _buildLogDropdownField(
+                                  context,
                                   "UNIT",
                                   selectedUnit,
                                   viewModel.glucoseUnits,
                                   (val) =>
                                       setModalState(() => selectedUnit = val!),
+                                  isDark: isDark,
                                 ),
                               ),
                             ],
@@ -528,8 +622,10 @@ class MonitoringView extends StatelessWidget {
                             children: [
                               Expanded(
                                 child: _buildLogInputField(
+                                  context,
                                   "DATE",
                                   DateFormat("dd/MM/yyyy").format(selectedDate),
+                                  isDark: isDark,
                                   suffixIcon: Icons.calendar_month,
                                   readOnly: true,
                                   onTap: () async {
@@ -551,8 +647,10 @@ class MonitoringView extends StatelessWidget {
                               const SizedBox(width: 15),
                               Expanded(
                                 child: _buildLogInputField(
+                                  context,
                                   "TIME",
                                   selectedTime.format(context),
+                                  isDark: isDark,
                                   suffixIcon: Icons.access_time,
                                   readOnly: true,
                                   onTap: () async {
@@ -573,19 +671,26 @@ class MonitoringView extends StatelessWidget {
                           ),
                           const SizedBox(height: 30),
 
-                          _buildSectionHeader(Icons.restaurant, "My Foods"),
+                          _buildSectionHeader(
+                            Icons.restaurant,
+                            "My Foods",
+                            isDark: isDark,
+                          ),
                           _buildMealSelectors(
                             selectedMeal,
                             (val) => setModalState(() => selectedMeal = val),
+                            isDark,
                           ),
                           const SizedBox(height: 15),
 
                           _buildLogDropdownField(
+                            context,
                             "",
                             selectedDefaultFood,
                             viewModel.defaultFoods,
                             (val) =>
                                 setModalState(() => selectedDefaultFood = val!),
+                            isDark: isDark,
                           ),
                           const SizedBox(height: 15),
                           Row(
@@ -594,6 +699,8 @@ class MonitoringView extends StatelessWidget {
                                 child: _buildLogTextField(
                                   customFoodCtrl,
                                   "Custom...",
+                                  isDark,
+                                  context,
                                 ),
                               ),
                               const SizedBox(width: 10),
@@ -633,6 +740,7 @@ class MonitoringView extends StatelessWidget {
                           _buildSectionHeader(
                             Icons.medication_outlined,
                             "Insulin & Medication",
+                            isDark: isDark,
                             iconColor: const Color(0xFF9333EA),
                           ),
                           Container(
@@ -641,19 +749,21 @@ class MonitoringView extends StatelessWidget {
                               border: Border.all(
                                 color: const Color(
                                   0xFF9333EA,
-                                ).withValues(alpha: 0.2),
+                                ).withValues(alpha: isDark ? 0.4 : 0.2),
                               ),
                               borderRadius: BorderRadius.circular(12),
                               color: const Color(
                                 0xFF9333EA,
-                              ).withValues(alpha: 0.05),
+                              ).withValues(alpha: isDark ? 0.1 : 0.05),
                             ),
                             child: _buildLogDropdownField(
+                              context,
                               "",
                               selectedInsulin,
                               viewModel.insulinTypes,
                               (val) =>
                                   setModalState(() => selectedInsulin = val!),
+                              isDark: isDark,
                             ),
                           ),
                           const SizedBox(height: 40),
@@ -771,6 +881,7 @@ class MonitoringView extends StatelessWidget {
     IconData icon,
     String title, {
     Color iconColor = const Color(0xFFE65100),
+    required bool isDark,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 15),
@@ -787,13 +898,18 @@ class MonitoringView extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          const Icon(Icons.close, color: Colors.grey, size: 16),
+          Icon(
+            Icons.close,
+            color: isDark ? Colors.grey.shade600 : Colors.grey,
+            size: 16,
+          ),
         ],
       ),
     );
   }
 
   Widget _buildLogInputField(
+    BuildContext context,
     String label,
     String value, {
     IconData? prefixIcon,
@@ -803,6 +919,7 @@ class MonitoringView extends StatelessWidget {
     TextEditingController? controller,
     bool hasError = false,
     String? errorText,
+    required bool isDark,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -812,7 +929,9 @@ class MonitoringView extends StatelessWidget {
           style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.bold,
-            color: hasError ? Colors.red : const Color(0xFF667085),
+            color: hasError
+                ? Colors.red
+                : (isDark ? Colors.grey.shade400 : const Color(0xFF667085)),
           ),
         ),
         const SizedBox(height: 8),
@@ -821,18 +940,21 @@ class MonitoringView extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 14),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).cardColor, // ✅ متجاوب
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: hasError ? Colors.red : Colors.grey.shade200,
+                color: hasError
+                    ? Colors.red
+                    : (isDark ? Colors.grey.shade700 : Colors.grey.shade200),
                 width: hasError ? 1.5 : 1,
               ),
               boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.02),
-                  blurRadius: 6,
-                  offset: const Offset(0, 3),
-                ),
+                if (!isDark)
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.02),
+                    blurRadius: 6,
+                    offset: const Offset(0, 3),
+                  ),
               ],
             ),
             child: Row(
@@ -848,30 +970,39 @@ class MonitoringView extends StatelessWidget {
                   child: controller == null
                       ? Text(
                           value,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
-                            color: Colors.black87,
+                            color: isDark ? Colors.white : Colors.black87,
                           ),
                         )
                       : TextField(
                           controller: controller,
                           readOnly: readOnly,
                           keyboardType: TextInputType.number,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
-                            color: Colors.black87,
+                            color: isDark ? Colors.white : Colors.black87,
                           ),
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             hintText: "e.g. 120",
+                            hintStyle: TextStyle(
+                              color: isDark
+                                  ? Colors.grey.shade600
+                                  : Colors.grey.shade400,
+                            ),
                             border: InputBorder.none,
                             contentPadding: EdgeInsets.zero,
                           ),
                         ),
                 ),
                 if (suffixIcon != null)
-                  Icon(suffixIcon, color: Colors.grey, size: 18),
+                  Icon(
+                    suffixIcon,
+                    color: isDark ? Colors.grey.shade500 : Colors.grey,
+                    size: 18,
+                  ),
               ],
             ),
           ),
@@ -893,48 +1024,57 @@ class MonitoringView extends StatelessWidget {
   }
 
   Widget _buildLogDropdownField(
+    BuildContext context,
     String label,
     String value,
     List<String> items,
-    Function(String?) onChanged,
-  ) {
+    Function(String?) onChanged, {
+    required bool isDark,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (label.isNotEmpty)
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF667085),
+              color: isDark ? Colors.grey.shade400 : const Color(0xFF667085),
             ),
           ),
         if (label.isNotEmpty) const SizedBox(height: 8),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 6),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).cardColor, // ✅ متجاوب
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.grey.shade200),
+            border: Border.all(
+              color: isDark ? Colors.grey.shade700 : Colors.grey.shade200,
+            ),
             boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.02),
-                blurRadius: 6,
-                offset: const Offset(0, 3),
-              ),
+              if (!isDark)
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.02),
+                  blurRadius: 6,
+                  offset: const Offset(0, 3),
+                ),
             ],
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
               value: value,
               isExpanded: true,
-              style: const TextStyle(
+              dropdownColor: Theme.of(context).cardColor, // ✅ لون القائمة
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
-                color: Colors.black87,
+                color: isDark ? Colors.white : Colors.black87,
               ),
-              icon: const Icon(Icons.keyboard_arrow_down, color: Colors.grey),
+              icon: Icon(
+                Icons.keyboard_arrow_down,
+                color: isDark ? Colors.grey.shade500 : Colors.grey,
+              ),
               items: items
                   .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                   .toList(),
@@ -946,14 +1086,26 @@ class MonitoringView extends StatelessWidget {
     );
   }
 
-  Widget _buildLogTextField(TextEditingController controller, String hint) {
+  Widget _buildLogTextField(
+    TextEditingController controller,
+    String hint,
+    bool isDark,
+    BuildContext context,
+  ) {
     return TextField(
       controller: controller,
-      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+      style: TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w500,
+        color: isDark ? Colors.white : Colors.black87,
+      ),
       decoration: InputDecoration(
         hintText: hint,
+        hintStyle: TextStyle(
+          color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
+        ),
         filled: true,
-        fillColor: Colors.white,
+        fillColor: Theme.of(context).cardColor, // ✅ متجاوب
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 15,
           vertical: 14,
@@ -964,7 +1116,9 @@ class MonitoringView extends StatelessWidget {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: Colors.grey.shade200),
+          borderSide: BorderSide(
+            color: isDark ? Colors.grey.shade700 : Colors.grey.shade200,
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
@@ -974,12 +1128,17 @@ class MonitoringView extends StatelessWidget {
     );
   }
 
-  Widget _buildMealSelectors(String selectedMeal, Function(String) onSelected) {
+  Widget _buildMealSelectors(
+    String selectedMeal,
+    Function(String) onSelected,
+    bool isDark,
+  ) {
     List<String> meals = ["Breakfast", "Lunch", "Dinner", "Extra"];
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey.shade100,
+        color: isDark ? Colors.grey.shade900 : Colors.grey.shade100, // ✅ متجاوب
         borderRadius: BorderRadius.circular(12),
+        border: isDark ? Border.all(color: Colors.grey.shade800) : null,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1000,7 +1159,9 @@ class MonitoringView extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                  color: isSelected ? Colors.white : Colors.grey,
+                  color: isSelected
+                      ? Colors.white
+                      : (isDark ? Colors.grey.shade400 : Colors.grey),
                 ),
               ),
             ),

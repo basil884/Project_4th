@@ -8,7 +8,9 @@ class ChatThreadCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // ✅ أضفنا GestureDetector هنا لالتقاط الضغطة
+    // 🔥 استخراج حالة الثيم لضبط الألوان
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return GestureDetector(
       onTap: () {
         // الانتقال لشاشة الشات الفعلية مع تمرير بيانات الدكتور
@@ -21,14 +23,22 @@ class ChatThreadCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: const Color(0xFFE8F1E9), // الأخضر الفاتح جداً
+          // ✅ لون مريح جداً للعين في كلا الوضعين (رمادي زيتي هادئ للمظلم، وأخضر فاتح جداً للفاتح)
+          color: isDark ? const Color(0xFF262B27) : const Color(0xFFF1FAF2),
           borderRadius: BorderRadius.circular(15),
+
+          // ✅ السحر هنا: إطار شفاف جداً يحدد حواف الكارت بوضوح تام في الوضع المظلم
+          border: isDark
+              ? Border.all(color: Colors.white.withValues(alpha: 0.05))
+              : null,
+
           boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 5,
-              offset: const Offset(0, 3),
-            ),
+            if (!isDark) // الظل يظهر فقط في الوضع الفاتح
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 6,
+                offset: const Offset(0, 3),
+              ),
           ],
         ),
         child: Row(
@@ -37,10 +47,15 @@ class ChatThreadCard extends StatelessWidget {
             CircleAvatar(
               radius: 30,
               backgroundImage: AssetImage(chat.doctorImage),
-              backgroundColor: Colors.white,
+              backgroundColor: isDark
+                  ? const Color(0xFF1E221F)
+                  : Colors.white, // ✅ خلفية أغمق قليلاً للصورة في المظلم
               onBackgroundImageError: (_, _) {},
               child: chat.doctorImage.isEmpty
-                  ? const Icon(Icons.person, color: Colors.grey)
+                  ? Icon(
+                      Icons.person,
+                      color: isDark ? Colors.grey[500] : Colors.grey,
+                    )
                   : null,
             ),
             const SizedBox(width: 15),
@@ -52,16 +67,22 @@ class ChatThreadCard extends StatelessWidget {
                 children: [
                   Text(
                     chat.doctorName,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF2E3D30), // لون نص زيتي داكن
+                      // ✅ لون النص يتغير ليكون مريحاً
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.9)
+                          : const Color(0xFF2E3D30),
                     ),
                   ),
                   const SizedBox(height: 5),
                   Text(
                     chat.lastMessage,
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isDark ? Colors.grey[400] : Colors.grey[600],
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),

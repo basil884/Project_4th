@@ -2,11 +2,11 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:intl/intl.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:easy_localization/easy_localization.dart'; // ✅ استدعاء مكتبة الترجمة
 import 'package:sugar_wise/features/patient/laptests/model/lap_test_model.dart';
 
 class LabTestsViewModel extends ChangeNotifier {
@@ -38,6 +38,14 @@ class LabTestsViewModel extends ChangeNotifier {
   ];
 
   List<ReportModel> get reports => _reports;
+
+  // ====================================================================
+  // 🔥 الدالة الجديدة المخصصة لاستقبال التقرير من الـ BottomSheet
+  // ====================================================================
+  void addReport(ReportModel newReport) {
+    _reports.insert(0, newReport); // إضافة التقرير الجديد في أعلى القائمة
+    notifyListeners(); // تحديث الشاشة
+  }
 
   Future<void> uploadReport(BuildContext context) async {
     try {
@@ -80,71 +88,84 @@ class LabTestsViewModel extends ChangeNotifier {
 
         _reports.insert(0, newReport);
         notifyListeners();
-        _showMessage(context, "✅ File uploaded successfully!");
+
+        if (context.mounted) {
+          _showMessage(context, "file_uploaded_successfully".tr()); // ✅ مترجم
+        }
       }
     } catch (e) {
-      _showMessage(context, "❌ Error uploading file.", isSuccess: false);
-    }
-  }
-
-  void viewReport(BuildContext context, ReportModel report) async {
-    if (report.filePath != null) {
-      final result = await OpenFilex.open(report.filePath!);
-      if (result.type != ResultType.done) {
-        _showMessage(context, "❌ Could not open this file.", isSuccess: false);
+      if (context.mounted) {
+        _showMessage(
+          context,
+          "error_uploading_file".tr(),
+          isSuccess: false,
+        ); // ✅ مترجم
       }
-    } else {
-      _showMessage(
-        context,
-        "⚠️ This is a demo file. Upload a real file to view it.",
-        isSuccess: false,
-      );
     }
   }
 
-  // ⬇️ زر التحميل (Download) المخصص (حفظ فقط بدون مشاركة)
-  // ⬇️ زر التحميل (Download) الحقيقي
+  // ==========================================
+  // 1. دالة عرض التقرير (View)
+  // ==========================================
+  void viewReport(BuildContext context, ReportModel report) async {
+    if (report.filePath == null) {
+      _showMessage(context, "demo_file_msg".tr(), isSuccess: false);
+      return;
+    }
+
+    try {
+      debugPrint("🔗 Trying to open file at: ${report.filePath}");
+      final result = await OpenFilex.open(report.filePath!);
+
+      if (result.type != ResultType.done && context.mounted) {
+        debugPrint("❌ OpenFile Error: ${result.message}");
+        _showMessage(context, "Error: ${result.message}", isSuccess: false);
+      }
+    } catch (e) {
+      debugPrint("❌ View Catch Error: $e");
+      if (context.mounted) _showMessage(context, "Error: $e", isSuccess: false);
+    }
+  }
+
+  // ==========================================
+  // 2. دالة تحميل التقرير (Download)
+  // ==========================================
   void downloadReport(BuildContext context, ReportModel report) async {
     if (report.filePath == null) {
-      _showMessage(
-        context,
-        "⚠️ This is a demo file. Upload a real file to download.",
-        isSuccess: false,
-      );
+      _showMessage(context, "demo_file_msg".tr(), isSuccess: false);
       return;
     }
 
     try {
       _showMessage(
         context,
-        "⏳ Downloading ${report.title}...",
+        "${"downloading_file".tr()} ${report.title}...",
         isSuccess: true,
       );
 
-      // 1. طلب صلاحية التخزين من المستخدم (إذا كان أندرويد)
+      // ✅ طلب صلاحيات التخزين العادية والمتقدمة (لأندرويد 11 فما فوق)
       if (Platform.isAndroid) {
         var status = await Permission.storage.status;
-        if (!status.isGranted) {
+        var manageStatus = await Permission.manageExternalStorage.status;
+
+        if (!status.isGranted && !manageStatus.isGranted) {
+          debugPrint("⚠️ Requesting Storage Permissions...");
           await Permission.storage.request();
+          await Permission.manageExternalStorage.request();
         }
       }
 
-      // 2. تحديد مسار مجلد التنزيلات (Downloads) بناءً على نوع الهاتف
       Directory? downloadsDirectory;
       if (Platform.isAndroid) {
-        // مسار التنزيلات الثابت في الأندرويد
         downloadsDirectory = Directory('/storage/emulated/0/Download');
       } else if (Platform.isIOS) {
-        // مسار المستندات في الآيفون
         downloadsDirectory = await getApplicationDocumentsDirectory();
       }
 
       if (downloadsDirectory != null && await downloadsDirectory.exists()) {
-        // 3. نسخ الملف من الذاكرة المؤقتة إلى الهاتف الحقيقي
         File sourceFile = File(report.filePath!);
         String newPath = "${downloadsDirectory.path}/${report.title}";
 
-        // 💡 خطوة ذكية: التأكد من عدم وجود ملف بنفس الاسم لتجنب استبداله
         int counter = 1;
         while (await File(newPath).exists()) {
           int dotIndex = report.title.lastIndexOf('.');
@@ -156,48 +177,69 @@ class LabTestsViewModel extends ChangeNotifier {
           counter++;
         }
 
-        // عملية النسخ الفعلي للملف
         await sourceFile.copy(newPath);
 
-        // رسالة النجاح
         if (context.mounted) {
-          _showMessage(context, "✅ Saved successfully to Downloads!\n$newPath");
+          _showMessage(context, "${"saved_to_downloads".tr()}\n$newPath");
         }
       } else {
+        if (context.mounted) {
+          _showMessage(
+            context,
+            "downloads_folder_not_found".tr(),
+            isSuccess: false,
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint("❌ Download Error: $e");
+      if (context.mounted) {
         _showMessage(
           context,
-          "❌ Could not find Downloads folder.",
+          "${"error_saving_file".tr()} $e",
           isSuccess: false,
         );
       }
-    } catch (e) {
-      _showMessage(context, "❌ Error saving file: $e", isSuccess: false);
     }
   }
 
-  // 📤 زر المشاركة (Share) المخصص (يفتح نافذة الواتساب/الإيميل)
+  // ==========================================
+  // 3. دالة مشاركة التقرير (Share)
+  // ==========================================
   void shareReport(BuildContext context, ReportModel report) async {
-    if (report.filePath != null) {
-      await Share.shareXFiles([
-        XFile(report.filePath!),
-      ], text: 'Medical Report: ${report.title}');
-    } else {
-      _showMessage(
-        context,
-        "⚠️ This is a demo file. Upload a real file to share.",
-        isSuccess: false,
+    if (report.filePath == null) {
+      _showMessage(context, "demo_file_msg".tr(), isSuccess: false);
+      return;
+    }
+
+    try {
+      debugPrint("🔗 Trying to share file at: ${report.filePath}");
+
+      // ✅ استخدام الطريقة الحديثة والمدعومة من المكتبة الجديدة
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(report.filePath!)],
+          text: 'Medical Report: ${report.title}',
+        ),
       );
+    } catch (e) {
+      debugPrint("❌ Share Catch Error: $e");
+
+      // ✅ إضافة الأقواس المتعرجة لجملة الشرط لتطابق أفضل الممارسات
+      if (context.mounted) {
+        _showMessage(context, "Share Error: $e", isSuccess: false);
+      }
     }
   }
 
   void deleteReport(BuildContext context, ReportModel report) {
     _reports.remove(report);
     notifyListeners();
-    _showMessage(context, "🗑️ Report deleted successfully!");
+    _showMessage(context, "report_deleted".tr()); // ✅ مترجم
   }
 
   void startScanning(BuildContext context) {
-    _showMessage(context, "📸 Opening camera to scan document...");
+    _showMessage(context, "opening_camera".tr()); // ✅ مترجم
   }
 
   void _showMessage(
@@ -216,7 +258,9 @@ class LabTestsViewModel extends ChangeNotifier {
         ),
         backgroundColor: isSuccess
             ? const Color(0xFF10B981)
-            : const Color(0xFFF97316),
+            : const Color(
+                0xFFEF4444,
+              ), // تم التعديل إلى الأحمر ليناسب أخطاء الفشل
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),

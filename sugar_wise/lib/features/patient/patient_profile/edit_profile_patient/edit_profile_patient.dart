@@ -30,8 +30,6 @@ class _EditProfileState extends State<EditProfile> {
   String selectedBolus = "Novorapid";
 
   File? _pickedImage;
-
-  // ✅ متغير للتحكم في ظهور دائرة التحميل أثناء جلب الموقع
   bool _isLoadingLocation = false;
 
   @override
@@ -99,18 +97,15 @@ class _EditProfileState extends State<EditProfile> {
     }
   }
 
-  // 🔥 السحر هنا: دالة جلب الموقع الحالي وتحويله لعنوان نصي
   Future<void> _getCurrentLocation() async {
-    setState(() => _isLoadingLocation = true); // تشغيل دائرة التحميل
+    setState(() => _isLoadingLocation = true);
 
     try {
-      // 1. التأكد من أن الـ GPS يعمل
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
         throw Exception('Location services are disabled. Please enable GPS.');
       }
 
-      // 2. طلب صلاحية الموقع من المستخدم
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
@@ -122,12 +117,12 @@ class _EditProfileState extends State<EditProfile> {
         throw Exception('Location permissions are permanently denied.');
       }
 
-      // 3. جلب الإحداثيات الحالية (طول وعرض)
       Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          // يمكنك تغيير high للقيمة التي كنت تستخدمها
+        ),
       );
-
-      // 4. تحويل الإحداثيات إلى اسم شارع ومدينة
       List<Placemark> placemarks = await placemarkFromCoordinates(
         position.latitude,
         position.longitude,
@@ -135,24 +130,21 @@ class _EditProfileState extends State<EditProfile> {
 
       if (placemarks.isNotEmpty) {
         Placemark place = placemarks[0];
-        // تجميع العنوان بشكل أنيق (مثال: Al-Maadi, Cairo, Egypt)
         String address =
             "${place.street != null && place.street!.isNotEmpty ? '${place.street}, ' : ''}${place.locality ?? place.subAdministrativeArea}, ${place.country}";
 
-        // تحديث حقل النص مباشرة
         setState(() {
           addressCtrl.text = address;
         });
       }
     } catch (e) {
-      // إظهار رسالة خطأ إذا رفض المستخدم أو حدثت مشكلة
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
         );
       }
     } finally {
-      setState(() => _isLoadingLocation = false); // إيقاف التحميل
+      setState(() => _isLoadingLocation = false);
     }
   }
 
@@ -178,6 +170,9 @@ class _EditProfileState extends State<EditProfile> {
   @override
   Widget build(BuildContext context) {
     final patient = widget.viewModel.patientData;
+    // 🔥 استخراج حالة الثيم لضبط الألوان
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.black87;
 
     ImageProvider getImageProvider() {
       if (_pickedImage != null) return FileImage(_pickedImage!);
@@ -188,19 +183,21 @@ class _EditProfileState extends State<EditProfile> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F6F9),
+      backgroundColor: Theme.of(
+        context,
+      ).scaffoldBackgroundColor, // ✅ متجاوب مع الثيم
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor, // ✅ متجاوب
         elevation: 0,
-        title: const Text(
+        iconTheme: IconThemeData(color: textColor), // لون السهم متجاوب
+        title: Text(
           "Edit Profile Patient",
           style: TextStyle(
-            color: Colors.black,
+            color: textColor, // ✅ متجاوب
             fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
         ),
-        // centerTitle: true,
         leadingWidth: 90,
         actions: [
           Padding(
@@ -240,7 +237,9 @@ class _EditProfileState extends State<EditProfile> {
                         children: [
                           CircleAvatar(
                             radius: 45,
-                            backgroundColor: Colors.grey[300],
+                            backgroundColor: isDark
+                                ? Colors.grey[800]
+                                : Colors.grey[300],
                             backgroundImage: getImageProvider(),
                           ),
                           Positioned(
@@ -252,7 +251,9 @@ class _EditProfileState extends State<EditProfile> {
                                 color: Colors.deepOrange,
                                 shape: BoxShape.circle,
                                 border: Border.all(
-                                  color: Colors.white,
+                                  color: Theme.of(
+                                    context,
+                                  ).scaffoldBackgroundColor, // ✅ متجاوب
                                   width: 2,
                                 ),
                               ),
@@ -269,10 +270,10 @@ class _EditProfileState extends State<EditProfile> {
                     const SizedBox(height: 12),
                     Text(
                       patient.name,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                        color: textColor, // ✅ متجاوب
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -289,14 +290,25 @@ class _EditProfileState extends State<EditProfile> {
               ),
               const SizedBox(height: 30),
 
-              _buildSectionHeader(Icons.person_outline, "Personal Details"),
-              _buildLabelAndField("Age", _buildTextField(ageCtrl)),
+              _buildSectionHeader(
+                Icons.person_outline,
+                "Personal Details",
+                isDark,
+              ),
+              _buildLabelAndField(
+                "Age",
+                _buildTextField(ageCtrl, isDark),
+                isDark,
+              ),
               _buildLabelAndField(
                 "Gender",
-                _buildDropdown(selectedGender, [
-                  "Male",
-                  "Female",
-                ], (val) => setState(() => selectedGender = val!)),
+                _buildDropdown(
+                  selectedGender,
+                  ["Male", "Female"],
+                  (val) => setState(() => selectedGender = val!),
+                  isDark,
+                ),
+                isDark,
               ),
               _buildLabelAndField(
                 "Blood Type",
@@ -304,16 +316,27 @@ class _EditProfileState extends State<EditProfile> {
                   selectedBloodType,
                   ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"],
                   (val) => setState(() => selectedBloodType = val!),
+                  isDark,
                 ),
+                isDark,
               ),
-              _buildLabelAndField("Phone", _buildTextField(phoneCtrl)),
-              _buildLabelAndField("Email", _buildTextField(emailCtrl)),
+              _buildLabelAndField(
+                "Phone",
+                _buildTextField(phoneCtrl, isDark),
+                isDark,
+              ),
+              _buildLabelAndField(
+                "Email",
+                _buildTextField(emailCtrl, isDark),
+                isDark,
+              ),
 
-              // ✅ حقل العنوان مع أيقونة الـ GPS الذكية
+              // ✅ حقل العنوان مع أيقونة الـ GPS
               _buildLabelAndField(
                 "Address",
                 _buildTextField(
                   addressCtrl,
+                  isDark,
                   suffixIcon: _isLoadingLocation
                       ? const Padding(
                           padding: EdgeInsets.all(12.0),
@@ -335,24 +358,31 @@ class _EditProfileState extends State<EditProfile> {
                           tooltip: "Get Current Location",
                         ),
                 ),
+                isDark,
               ),
 
               const SizedBox(height: 10),
 
-              _buildSectionHeader(Icons.monitor_weight_outlined, "Vitals"),
+              _buildSectionHeader(
+                Icons.monitor_weight_outlined,
+                "Vitals",
+                isDark,
+              ),
               Row(
                 children: [
                   Expanded(
                     child: _buildLabelAndField(
                       "Height (cm)",
-                      _buildTextField(heightCtrl),
+                      _buildTextField(heightCtrl, isDark),
+                      isDark,
                     ),
                   ),
                   const SizedBox(width: 15),
                   Expanded(
                     child: _buildLabelAndField(
                       "Weight (kg)",
-                      _buildTextField(weightCtrl),
+                      _buildTextField(weightCtrl, isDark),
+                      isDark,
                     ),
                   ),
                 ],
@@ -362,35 +392,44 @@ class _EditProfileState extends State<EditProfile> {
               _buildSectionHeader(
                 Icons.history_edu_outlined,
                 "Medical History",
+                isDark,
               ),
               _buildLabelAndField(
                 "Primary Condition",
-                _buildTextField(conditionCtrl),
+                _buildTextField(conditionCtrl, isDark),
+                isDark,
               ),
               _buildLabelAndField(
                 "Years of illness",
-                _buildTextField(durationCtrl),
+                _buildTextField(durationCtrl, isDark),
+                isDark,
               ),
               const SizedBox(height: 10),
 
-              _buildSectionHeader(Icons.vaccines_outlined, "Insulin Regimen"),
+              _buildSectionHeader(
+                Icons.vaccines_outlined,
+                "Insulin Regimen",
+                isDark,
+              ),
               _buildLabelAndField(
                 "First Insulin (Basal)",
-                _buildDropdown(selectedBasal, [
-                  "Lantus",
-                  "Levemir",
-                  "Tresiba",
-                  "Toujeo",
-                ], (val) => setState(() => selectedBasal = val!)),
+                _buildDropdown(
+                  selectedBasal,
+                  ["Lantus", "Levemir", "Tresiba", "Toujeo"],
+                  (val) => setState(() => selectedBasal = val!),
+                  isDark,
+                ),
+                isDark,
               ),
               _buildLabelAndField(
                 "Second Insulin (Bolus)",
-                _buildDropdown(selectedBolus, [
-                  "Novorapid",
-                  "Humalog",
-                  "Apidra",
-                  "Fiasp",
-                ], (val) => setState(() => selectedBolus = val!)),
+                _buildDropdown(
+                  selectedBolus,
+                  ["Novorapid", "Humalog", "Apidra", "Fiasp"],
+                  (val) => setState(() => selectedBolus = val!),
+                  isDark,
+                ),
+                isDark,
               ),
               const SizedBox(height: 10),
 
@@ -400,6 +439,7 @@ class _EditProfileState extends State<EditProfile> {
                   _buildSectionHeader(
                     Icons.medication_outlined,
                     "Other Medications",
+                    isDark,
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(
@@ -407,7 +447,9 @@ class _EditProfileState extends State<EditProfile> {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.orange.shade50,
+                      color: isDark
+                          ? Colors.deepOrange.withValues(alpha: 0.1)
+                          : Colors.orange.shade50,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Text(
@@ -422,11 +464,17 @@ class _EditProfileState extends State<EditProfile> {
                 ],
               ),
               const SizedBox(height: 15),
-              _buildMedicationCard("Metformin", "Oral Tablet", "Twice daily"),
+              _buildMedicationCard(
+                "Metformin",
+                "Oral Tablet",
+                "Twice daily",
+                isDark,
+              ),
               _buildMedicationCard(
                 "Atorvastatin",
                 "Oral Tablet",
                 "Every night",
+                isDark,
               ),
               const SizedBox(height: 30),
 
@@ -440,13 +488,19 @@ class _EditProfileState extends State<EditProfile> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        side: BorderSide(color: Colors.grey.shade300),
-                        backgroundColor: Colors.white,
+                        side: BorderSide(
+                          color: isDark
+                              ? Colors.grey.shade700
+                              : Colors.grey.shade300,
+                        ),
+                        backgroundColor: isDark
+                            ? Colors.transparent
+                            : Colors.white,
                       ),
-                      child: const Text(
+                      child: Text(
                         "Discard Changes",
                         style: TextStyle(
-                          color: Colors.black87,
+                          color: isDark ? Colors.white : Colors.black87,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -483,7 +537,7 @@ class _EditProfileState extends State<EditProfile> {
     );
   }
 
-  Widget _buildSectionHeader(IconData icon, String title) {
+  Widget _buildSectionHeader(IconData icon, String title, bool isDark) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 15, top: 10),
       child: Row(
@@ -492,10 +546,10 @@ class _EditProfileState extends State<EditProfile> {
           const SizedBox(width: 8),
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.bold,
-              color: Colors.black87,
+              color: isDark ? Colors.white : Colors.black87, // ✅ متجاوب
             ),
           ),
         ],
@@ -503,7 +557,7 @@ class _EditProfileState extends State<EditProfile> {
     );
   }
 
-  Widget _buildLabelAndField(String label, Widget field) {
+  Widget _buildLabelAndField(String label, Widget field, bool isDark) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 15),
       child: Column(
@@ -513,7 +567,9 @@ class _EditProfileState extends State<EditProfile> {
             label,
             style: TextStyle(
               fontSize: 11,
-              color: Colors.grey.shade600,
+              color: isDark
+                  ? Colors.grey.shade400
+                  : Colors.grey.shade600, // ✅ متجاوب
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -524,17 +580,22 @@ class _EditProfileState extends State<EditProfile> {
     );
   }
 
-  // ✅ تم تحديث أداة بناء الـ TextField لتقبل أيقونة إضافية
+  // ✅ بناء الـ TextField بشكل متجاوب
   Widget _buildTextField(
-    TextEditingController controller, {
+    TextEditingController controller,
+    bool isDark, {
     Widget? suffixIcon,
   }) {
     return TextField(
       controller: controller,
-      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+      style: TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w500,
+        color: isDark ? Colors.white : Colors.black,
+      ),
       decoration: InputDecoration(
         filled: true,
-        fillColor: Colors.white,
+        fillColor: isDark ? Colors.grey[900] : Colors.white, // ✅ خلفية متجاوبة
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 15,
           vertical: 14,
@@ -545,33 +606,38 @@ class _EditProfileState extends State<EditProfile> {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: Colors.grey.shade200),
+          borderSide: BorderSide(
+            color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+          ), // ✅ إطار متجاوب
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: Colors.deepOrange),
         ),
-        suffixIcon: suffixIcon, // 👈 استقبال الأيقونة هنا
+        suffixIcon: suffixIcon,
       ),
     );
   }
 
+  // ✅ بناء الـ Dropdown بشكل متجاوب
   Widget _buildDropdown(
     String value,
     List<String> items,
     Function(String?) onChanged,
+    bool isDark,
   ) {
     return DropdownButtonFormField<String>(
-      value: value,
+      initialValue: value,
       icon: const Icon(Icons.keyboard_arrow_down, color: Colors.grey),
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.w500,
-        color: Colors.black87,
+        color: isDark ? Colors.white : Colors.black87, // ✅ لون النص
       ),
+      dropdownColor: isDark ? Colors.grey[900] : Colors.white, // ✅ لون القائمة
       decoration: InputDecoration(
         filled: true,
-        fillColor: Colors.white,
+        fillColor: isDark ? Colors.grey[900] : Colors.white, // ✅ خلفية الحقل
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 15,
           vertical: 12,
@@ -582,7 +648,9 @@ class _EditProfileState extends State<EditProfile> {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: Colors.grey.shade200),
+          borderSide: BorderSide(
+            color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+          ), // ✅ إطار
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
@@ -596,14 +664,22 @@ class _EditProfileState extends State<EditProfile> {
     );
   }
 
-  Widget _buildMedicationCard(String name, String type, String frequency) {
+  // ✅ كارت الأدوية متجاوب
+  Widget _buildMedicationCard(
+    String name,
+    String type,
+    String frequency,
+    bool isDark,
+  ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? Colors.grey[900] : Colors.white, // ✅ خلفية متجاوبة
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(
+          color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+        ), // ✅ إطار
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -611,21 +687,21 @@ class _EditProfileState extends State<EditProfile> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 "NAME",
                 style: TextStyle(
                   fontSize: 9,
-                  color: Colors.grey,
+                  color: isDark ? Colors.grey[500] : Colors.grey,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 name,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: isDark ? Colors.white : Colors.black87,
                 ),
               ),
             ],
@@ -633,36 +709,42 @@ class _EditProfileState extends State<EditProfile> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 "TYPE",
                 style: TextStyle(
                   fontSize: 9,
-                  color: Colors.grey,
+                  color: isDark ? Colors.grey[500] : Colors.grey,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 type,
-                style: const TextStyle(fontSize: 12, color: Colors.black87),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: isDark ? Colors.grey[300] : Colors.black87,
+                ),
               ),
             ],
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 "FREQUENCY",
                 style: TextStyle(
                   fontSize: 9,
-                  color: Colors.grey,
+                  color: isDark ? Colors.grey[500] : Colors.grey,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 frequency,
-                style: const TextStyle(fontSize: 12, color: Colors.black87),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: isDark ? Colors.grey[300] : Colors.black87,
+                ),
               ),
             ],
           ),

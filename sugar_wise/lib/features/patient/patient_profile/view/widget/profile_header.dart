@@ -12,6 +12,13 @@ class ProfileHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = Theme.of(context).scaffoldBackgroundColor;
+
+    // 🔥 متغيرات الأمان: تنظيف الرابط والتأكد أنه حقيقي وليس مسافة فارغة أو كلمة null
+    final String safeImageUrl = patient.imageUrl.trim();
+    final bool hasImage = safeImageUrl.isNotEmpty && safeImageUrl != 'null';
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.only(top: 60, bottom: 60),
@@ -19,7 +26,7 @@ class ProfileHeader extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF6B48FF), Color(0xFFFF5E3A)], // أزرق إلى برتقالي
+          colors: [Color(0xFF6B48FF), Color(0xFFFF5E3A)],
         ),
         borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(30),
@@ -28,56 +35,58 @@ class ProfileHeader extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // 1. صورة المريض (مع إمكانية الضغط عليها للتكبير)
+          // 1. صورة المريض
           GestureDetector(
             onTap: () {
-              // ✅ عند الضغط، ننتقل لشاشة عرض الصورة المرفقة بالأسفل
-              if (patient.imageUrl.isNotEmpty) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        _FullScreenImageView(imageUrl: patient.imageUrl),
+              // ✅ الآن نفتح الشاشة المكبرة دائماً، وسنمرر لها حالة الصورة (موجودة أم لا)
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => _FullScreenImageView(
+                    imageUrl: safeImageUrl,
+                    hasImage: hasImage, // نمرر حالة الصورة
                   ),
-                );
-              }
+                ),
+              );
             },
             child: Stack(
               clipBehavior: Clip.none,
               alignment: Alignment.center,
               children: [
-                // ✅ استخدمنا Hero لعمل أنيميشن طيران للصورة عند فتحها
                 Hero(
                   tag: 'profile_image',
                   child: CircleAvatar(
                     radius: 45,
-                    backgroundColor: Colors.white,
+                    backgroundColor: isDark ? bgColor : Colors.white,
                     child: CircleAvatar(
                       radius: 42,
-                      backgroundColor: Colors.grey[200],
-                      backgroundImage: patient.imageUrl.startsWith('assets/')
-                          ? AssetImage(patient.imageUrl) as ImageProvider
-                          : FileImage(File(patient.imageUrl)),
-                      // الأيقونة الرمادية تظهر فقط إذا لم يكن هناك أي صورة
-                      child: patient.imageUrl.isEmpty
-                          ? const Icon(
-                              Icons.person,
-                              size: 40,
-                              color: Colors.grey,
-                            )
+                      backgroundColor: isDark
+                          ? Colors.grey[800]
+                          : Colors.grey[200],
+                      // 🔥 التحقق الآمن من وجود الصورة
+                      backgroundImage: hasImage
+                          ? (safeImageUrl.startsWith('assets/')
+                                ? AssetImage(safeImageUrl) as ImageProvider
+                                : FileImage(File(safeImageUrl)))
                           : null,
+                      // ✅ إظهار أيقونة الشخص إذا لم تكن هناك صورة
+                      child: hasImage
+                          ? null
+                          : Icon(
+                              Icons.person,
+                              size: 45,
+                              color: isDark ? Colors.grey[500] : Colors.grey,
+                            ),
                     ),
                   ),
                 ),
-
-                // علامة الصح البرتقالية
                 Positioned(
                   bottom: 0,
                   right: 0,
                   child: Container(
                     padding: const EdgeInsets.all(2),
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
+                    decoration: BoxDecoration(
+                      color: isDark ? bgColor : Colors.white,
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
@@ -162,16 +171,20 @@ class ProfileHeader extends StatelessWidget {
                 ),
               );
             },
-            icon: const Icon(Icons.edit, color: Color(0xFF6B48FF), size: 16),
-            label: const Text(
+            icon: Icon(
+              Icons.edit,
+              color: isDark ? Colors.white : const Color(0xFF6B48FF),
+              size: 16,
+            ),
+            label: Text(
               "Edit Profile",
               style: TextStyle(
-                color: Color(0xFF6B48FF),
+                color: isDark ? Colors.white : const Color(0xFF6B48FF),
                 fontWeight: FontWeight.bold,
               ),
             ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
+              backgroundColor: isDark ? Colors.grey.shade900 : Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
@@ -186,36 +199,74 @@ class ProfileHeader extends StatelessWidget {
 }
 
 // ==========================================
-// ✅ شاشة جديدة مصغرة لعرض الصورة بالحجم الكامل
+// 🔥 شاشة عرض الصورة بالحجم الكامل المحدثة
+// ==========================================
+// ==========================================
+// 🔥 شاشة عرض الصورة بالحجم الكامل (نسخة مستقرة لا تنهار)
 // ==========================================
 class _FullScreenImageView extends StatelessWidget {
   final String imageUrl;
+  final bool hasImage;
 
-  const _FullScreenImageView({required this.imageUrl});
+  const _FullScreenImageView({required this.imageUrl, required this.hasImage});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black, // خلفية سوداء لبروز الصورة
+      backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: const IconThemeData(
-          color: Colors.white,
-        ), // سهم العودة باللون الأبيض
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Center(
-        // InteractiveViewer يسمح للمستخدم بعمل Zoom (تكبير وتصغير) بإصبعيه
         child: InteractiveViewer(
           panEnabled: true,
           minScale: 0.5,
           maxScale: 4.0,
           child: Hero(
-            tag:
-                'profile_image', // نفس التاج الموجود في الصورة الدائرية لربط الأنيميشن
-            child: imageUrl.startsWith('assets/')
-                ? Image.asset(imageUrl, fit: BoxFit.contain)
-                : Image.file(File(imageUrl), fit: BoxFit.contain),
+            tag: 'profile_image',
+            child: Builder(
+              builder: (context) {
+                // 1. إذا لم يكن هناك صورة أساساً، اعرض الأيقونة فوراً
+                if (!hasImage) {
+                  return const Icon(
+                    Icons.person,
+                    size: 200,
+                    color: Colors.grey,
+                  );
+                }
+
+                // 2. إذا كان المسار يبدأ بـ assets، سنحاول تحميله بحذر
+                if (imageUrl.startsWith('assets/')) {
+                  return Image.asset(
+                    imageUrl,
+                    fit: BoxFit.contain,
+                    // 🔥 هذا الجزء يمنع ظهور الخط الأحمر إذا لم يجد الملف
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Icon(
+                        Icons.person,
+                        size: 200,
+                        color: Colors.grey,
+                      );
+                    },
+                  );
+                }
+
+                // 3. إذا كان مسار ملف خارجي (صورة التقطها المستخدم)
+                return Image.file(
+                  File(imageUrl),
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Icon(
+                      Icons.person,
+                      size: 200,
+                      color: Colors.grey,
+                    );
+                  },
+                );
+              },
+            ),
           ),
         ),
       ),

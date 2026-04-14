@@ -21,12 +21,16 @@ class SecurtySettingPatient extends StatelessWidget {
     ),
   ];
 
-  // ✅ دالة منفصلة لعرض نافذة التحذير (Dialog) بشكل منظم
+  // ✅ دالة منفصلة لعرض نافذة التحذير (Dialog) بشكل منظم ومتجاوب
   void _showDeleteConfirmation(BuildContext context) {
+    // 🔥 استخراج حالة الثيم للنافذة المنبثقة
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          backgroundColor: Theme.of(context).cardColor, // ✅ لون النافذة متجاوب
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ), // حواف دائرية فخمة
@@ -43,9 +47,15 @@ class SecurtySettingPatient extends StatelessWidget {
               ),
             ],
           ),
-          content: const Text(
+          content: Text(
             "Are you sure you want to permanently delete your account? All your personal data and history will be lost. This action cannot be undone.",
-            style: TextStyle(fontSize: 14, color: Colors.black87, height: 1.5),
+            style: TextStyle(
+              fontSize: 14,
+              color: isDark
+                  ? Colors.grey.shade300
+                  : Colors.black87, // ✅ نص متجاوب
+              height: 1.5,
+            ),
           ),
           actions: [
             // خيار الرجوع (Cancel)
@@ -53,10 +63,12 @@ class SecurtySettingPatient extends StatelessWidget {
               onPressed: () {
                 Navigator.pop(context); // إغلاق النافذة فقط
               },
-              child: const Text(
+              child: Text(
                 "Cancel",
                 style: TextStyle(
-                  color: Colors.grey,
+                  color: isDark
+                      ? Colors.grey.shade400
+                      : Colors.grey, // ✅ متجاوب
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -97,17 +109,28 @@ class SecurtySettingPatient extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 🔥 استخراج حالة الثيم للشاشة الأساسية
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.black87;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F6F8),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor, // ✅ متجاوب
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           "Security Settings",
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
+          style: TextStyle(
+            color: textColor,
+            fontWeight: FontWeight.w600,
+          ), // ✅ متجاوب
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor, // ✅ متجاوب
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: textColor,
+            size: 20,
+          ), // ✅ متجاوب
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -121,8 +144,19 @@ class SecurtySettingPatient extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 12),
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).cardColor, // ✅ متجاوب
                   borderRadius: BorderRadius.circular(14),
+                  border: isDark
+                      ? Border.all(color: Colors.grey.shade800)
+                      : null, // إطار للوضع المظلم
+                  boxShadow: [
+                    if (!isDark) // ✅ إخفاء الظل في المظلم
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.04),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                  ],
                 ),
                 child: ListTile(
                   onTap: () {
@@ -143,23 +177,37 @@ class SecurtySettingPatient extends StatelessWidget {
                   leading: Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: item.iconColor.withValues(alpha: 0.1),
+                      color: item.iconColor.withValues(
+                        alpha: isDark ? 0.2 : 0.1,
+                      ), // تعميق الخلفية قليلاً في المظلم
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Icon(item.icon, color: item.iconColor),
                   ),
                   title: Text(
                     item.title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 16,
+                      color: textColor, // ✅ متجاوب
                     ),
                   ),
                   subtitle: Text(
                     item.subtitle,
-                    style: const TextStyle(fontSize: 13),
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: isDark
+                          ? Colors.grey.shade400
+                          : Colors.grey.shade600, // ✅ متجاوب
+                    ),
                   ),
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  trailing: Icon(
+                    Icons.arrow_forward_ios,
+                    size: 14,
+                    color: isDark
+                        ? Colors.grey.shade600
+                        : Colors.grey, // ✅ متجاوب
+                  ),
                 ),
               ),
             );

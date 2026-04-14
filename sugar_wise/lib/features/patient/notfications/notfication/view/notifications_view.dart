@@ -9,59 +9,80 @@ class NotificationsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final viewModel = Provider.of<NotificationsViewModel>(context);
+    final isDark =
+        Theme.of(context).brightness == Brightness.dark; // لمعرفة حالة الثيم
 
     return Scaffold(
-      backgroundColor: Colors.white, // خلفية بيضاء نظيفة
+      backgroundColor: Theme.of(
+        context,
+      ).scaffoldBackgroundColor, // ✅ خلفية ديناميكية
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 1. الهيدر (زر الرجوع + Mark as read)
-            _buildHeader(context, viewModel),
+            _buildHeader(context, viewModel, isDark),
 
             // 2. النصوص العلوية
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Text(
                 "Notifications",
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w900,
-                  color: Color(0xFF1D2939),
+                  color: isDark
+                      ? Colors.white
+                      : const Color(0xFF1D2939), // ✅ لون العنوان يتغير
                 ),
               ),
             ),
             const SizedBox(height: 5),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Text(
                 "Stay updated with your patients and clinic activities",
-                style: TextStyle(fontSize: 13, color: Color(0xFF667085)),
+                style: TextStyle(
+                  fontSize: 13,
+                  color: isDark
+                      ? Colors.grey.shade400
+                      : const Color(0xFF667085), // ✅ لون الوصف
+                ),
               ),
             ),
             const SizedBox(height: 20),
 
             // 3. التبويبات (All / Unread)
-            _buildTabs(viewModel),
-            Divider(height: 1, color: Colors.grey.shade200),
-
+            _buildTabs(viewModel, isDark),
+            Divider(
+              height: 1,
+              color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+            ), // ✅ خط فاصل ديناميكي
             // 4. قائمة الإشعارات
             Expanded(
               child: viewModel.filteredNotifications.isEmpty
-                  ? const Center(
+                  ? Center(
                       child: Text(
                         "No notifications here! 🎉",
-                        style: TextStyle(color: Colors.grey, fontSize: 16),
+                        style: TextStyle(
+                          color: isDark ? Colors.grey.shade500 : Colors.grey,
+                          fontSize: 16,
+                        ),
                       ),
                     )
                   : ListView.separated(
                       itemCount: viewModel.filteredNotifications.length,
-                      separatorBuilder: (context, index) =>
-                          Divider(height: 1, color: Colors.grey.shade100),
+                      separatorBuilder: (context, index) => Divider(
+                        height: 1,
+                        color: isDark
+                            ? Colors.grey.shade800
+                            : Colors.grey.shade100,
+                      ),
                       itemBuilder: (context, index) {
                         return _buildNotificationTile(
                           viewModel,
                           viewModel.filteredNotifications[index],
+                          context, // إرسال الـ context لقراءة الثيم
                         );
                       },
                     ),
@@ -77,8 +98,11 @@ class NotificationsView extends StatelessWidget {
   // ==========================================
 
   // الهيدر العلوي
-  Widget _buildHeader(BuildContext context, NotificationsViewModel viewModel) {
-    // إذا كان العداد 0، نجعل زر Mark as read رمادياً باهتاً
+  Widget _buildHeader(
+    BuildContext context,
+    NotificationsViewModel viewModel,
+    bool isDark,
+  ) {
     bool hasUnread = viewModel.unreadCount > 0;
 
     return Padding(
@@ -87,20 +111,28 @@ class NotificationsView extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           IconButton(
-            icon: const Icon(Icons.arrow_back, color: Color(0xFF667085)),
+            icon: Icon(
+              Icons.arrow_back_ios_new, // استخدام سهم أفضل
+              size: 20,
+              color: isDark ? Colors.white : const Color(0xFF667085),
+            ),
             onPressed: () => Navigator.pop(context),
           ),
           TextButton.icon(
             onPressed: hasUnread ? () => viewModel.markAllAsRead() : null,
             icon: Icon(
               Icons.done_all,
-              color: hasUnread ? const Color(0xFF2F66D0) : Colors.grey,
+              color: hasUnread
+                  ? const Color(0xFF2F66D0)
+                  : (isDark ? Colors.grey.shade700 : Colors.grey),
               size: 18,
             ),
             label: Text(
               "Mark as read",
               style: TextStyle(
-                color: hasUnread ? const Color(0xFF2F66D0) : Colors.grey,
+                color: hasUnread
+                    ? const Color(0xFF2F66D0)
+                    : (isDark ? Colors.grey.shade700 : Colors.grey),
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -111,7 +143,7 @@ class NotificationsView extends StatelessWidget {
   }
 
   // التبويبات مع العداد
-  Widget _buildTabs(NotificationsViewModel viewModel) {
+  Widget _buildTabs(NotificationsViewModel viewModel, bool isDark) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
@@ -120,13 +152,15 @@ class NotificationsView extends StatelessWidget {
             "All",
             viewModel.selectedTab == 'All',
             () => viewModel.setTab('All'),
+            isDark,
           ),
           const SizedBox(width: 25),
           _buildTabItem(
             "Unread",
             viewModel.selectedTab == 'Unread',
             () => viewModel.setTab('Unread'),
-            badgeCount: viewModel.unreadCount, // إرسال العداد الحقيقي
+            isDark,
+            badgeCount: viewModel.unreadCount,
           ),
         ],
       ),
@@ -137,7 +171,8 @@ class NotificationsView extends StatelessWidget {
   Widget _buildTabItem(
     String title,
     bool isSelected,
-    VoidCallback onTap, {
+    VoidCallback onTap,
+    bool isDark, {
     int badgeCount = 0,
   }) {
     return GestureDetector(
@@ -153,10 +188,13 @@ class NotificationsView extends StatelessWidget {
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
                   color: isSelected
                       ? const Color(0xFF2F66D0)
-                      : const Color(0xFF667085),
+                      : (isDark
+                            ? Colors.grey.shade500
+                            : const Color(
+                                0xFF667085,
+                              )), // ✅ تعديل لون التبويب غير النشط
                 ),
               ),
-              // عرض الـ Badge الأحمر فقط إذا كان العدد أكبر من صفر
               if (badgeCount > 0) ...[
                 const SizedBox(width: 6),
                 Container(
@@ -178,7 +216,6 @@ class NotificationsView extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 10),
-          // الخط الأزرق تحت التبويب المختار
           Container(
             height: 3,
             width: 30,
@@ -198,15 +235,28 @@ class NotificationsView extends StatelessWidget {
   Widget _buildNotificationTile(
     NotificationsViewModel viewModel,
     NotificationModel notification,
+    BuildContext context,
   ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // 🔥 تعديل ألوان الخلفية لتبدو أنيقة في الوضع المظلم والفاتح
+    Color unreadBgColor = isDark
+        ? const Color(0xFF2F66D0).withValues(
+            alpha: 0.15,
+          ) // أزرق غامق للغير مقروء في الداكن
+        : const Color(
+            0xFF2F66D0,
+          ).withValues(alpha: 0.04); // أزرق فاتح للغير مقروء في الفاتح
+
+    Color readBgColor = Colors
+        .transparent; // الأفضل أن يكون شفافاً ليأخذ لون الشاشة الخلفية مباشرة
+
     return InkWell(
-      onTap: () =>
-          viewModel.markAsRead(notification.id), // 🔥 عند الضغط يصبح مقروءاً
+      onTap: () => viewModel.markAsRead(notification.id),
       child: Container(
-        // خلفية زرقاء خفيفة جداً للغير مقروء، وبيضاء للمقروء
         color: notification.isRead
-            ? Colors.white
-            : const Color(0xFF2F66D0).withValues(alpha: 0.04),
+            ? readBgColor
+            : unreadBgColor, // ✅ تطبيق الخلفية الذكية
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -215,7 +265,10 @@ class NotificationsView extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: notification.bgColor,
+                // تعتيم لون خلفية الأيقونة قليلاً في الوضع المظلم
+                color: isDark
+                    ? notification.bgColor.withValues(alpha: 0.2)
+                    : notification.bgColor,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
@@ -237,13 +290,14 @@ class NotificationsView extends StatelessWidget {
                       Expanded(
                         child: Text(
                           notification.title,
-                          // 🔥 النص يكون عريض جداً (Bold) إذا كان غير مقروء
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: notification.isRead
                                 ? FontWeight.w600
                                 : FontWeight.w900,
-                            color: const Color(0xFF1D2939),
+                            color: isDark
+                                ? Colors.white
+                                : const Color(0xFF1D2939), // ✅ لون العنوان
                           ),
                         ),
                       ),
@@ -251,9 +305,10 @@ class NotificationsView extends StatelessWidget {
                         notification.time,
                         style: TextStyle(
                           fontSize: 11,
-                          // 🔥 لون الوقت يكون أزرق بارز إذا كان غير مقروء
                           color: notification.isRead
-                              ? Colors.grey.shade500
+                              ? (isDark
+                                    ? Colors.grey.shade500
+                                    : Colors.grey.shade500)
                               : const Color(0xFF2F66D0),
                           fontWeight: notification.isRead
                               ? FontWeight.normal
@@ -267,10 +322,13 @@ class NotificationsView extends StatelessWidget {
                     notification.subtitle,
                     style: TextStyle(
                       fontSize: 13,
-                      // لون الوصف يغمق قليلاً إذا كان غير مقروء
                       color: notification.isRead
-                          ? const Color(0xFF667085)
-                          : const Color(0xFF344054),
+                          ? (isDark
+                                ? Colors.grey.shade400
+                                : const Color(0xFF667085))
+                          : (isDark
+                                ? Colors.grey.shade300
+                                : const Color(0xFF344054)), // ✅ لون الوصف الذكي
                       height: 1.4,
                     ),
                   ),
@@ -278,7 +336,7 @@ class NotificationsView extends StatelessWidget {
               ),
             ),
 
-            // 🔥 السحر هنا: نقطة زرقاء (Dot) للفت الانتباه تظهر فقط للإشعارات غير المقروءة
+            // النقطة الزرقاء للإشعار الجديد
             if (!notification.isRead)
               Container(
                 margin: const EdgeInsets.only(left: 12, top: 4),

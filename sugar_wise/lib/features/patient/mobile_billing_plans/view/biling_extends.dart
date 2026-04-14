@@ -5,7 +5,7 @@ import 'package:sugar_wise/features/patient/mobile_billing_plans/model/billiing_
 class Billing extends StatelessWidget {
   Billing({super.key});
 
-  List<BillingModel> billingList = [
+  final List<BillingModel> billingList = [
     BillingModel(
       date: "Oct 24, 2024",
       title: "Consultation - Dr. Ali",
@@ -21,18 +21,29 @@ class Billing extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 🔥 استخراج حالة الثيم لضبط الألوان
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.black87;
+
     return Scaffold(
-      backgroundColor: const Color(0xffF0F2F5),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor, // ✅ متجاوب
 
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           "Billing & Plans",
-          style: TextStyle(color: Colors.black),
+          style: TextStyle(
+            color: textColor,
+            fontWeight: FontWeight.bold,
+          ), // ✅ متجاوب
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor, // ✅ متجاوب
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: textColor,
+            size: 20,
+          ), // ✅ متجاوب
           onPressed: () {
             Navigator.pop(context);
           },
@@ -46,27 +57,45 @@ class Billing extends StatelessWidget {
           padding: const EdgeInsets.all(20),
 
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).cardColor, // ✅ متجاوب
             borderRadius: BorderRadius.circular(20),
+            border: isDark
+                ? Border.all(color: Colors.grey.shade800)
+                : null, // ✅ إطار للمظلم
+            boxShadow: [
+              if (!isDark) // ✅ إخفاء الظل في الوضع المظلم
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+            ],
           ),
 
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 "Billing & Plans",
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: textColor, // ✅ متجاوب
+                ),
               ),
 
               const SizedBox(height: 25),
 
               Row(
-                children: const [
-                  Icon(Icons.credit_card, color: Colors.blue),
-                  SizedBox(width: 8),
+                children: [
+                  const Icon(Icons.credit_card, color: Colors.blue),
+                  const SizedBox(width: 8),
                   Text(
                     "Payment Method",
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: textColor, // ✅ متجاوب
+                    ),
                   ),
                 ],
               ),
@@ -77,8 +106,14 @@ class Billing extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: const Color(0xffEBF2FF),
+                  // ✅ تعميق لون خلفية الفيزا في المظلم
+                  color: isDark
+                      ? const Color(0xff1E293B).withValues(alpha: 0.5)
+                      : const Color(0xffEBF2FF),
                   borderRadius: BorderRadius.circular(15),
+                  border: isDark
+                      ? Border.all(color: Colors.blue.withValues(alpha: 0.3))
+                      : null,
                 ),
 
                 child: Column(
@@ -132,16 +167,25 @@ class Billing extends StatelessWidget {
 
                     const SizedBox(height: 20),
 
-                    const Text(
+                    Text(
                       "**** **** **** 4242",
-                      style: TextStyle(fontSize: 18, letterSpacing: 2),
+                      style: TextStyle(
+                        fontSize: 18,
+                        letterSpacing: 2,
+                        color: textColor, // ✅ متجاوب
+                      ),
                     ),
 
                     const SizedBox(height: 15),
 
-                    const Text(
+                    Text(
                       "EXPIRES 12/25",
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: isDark
+                            ? Colors.grey.shade300
+                            : Colors.black87, // ✅ متجاوب
+                      ),
                     ),
                   ],
                 ),
@@ -149,9 +193,13 @@ class Billing extends StatelessWidget {
 
               const SizedBox(height: 30),
 
-              const Text(
+              Text(
                 "Billing History",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: textColor, // ✅ متجاوب
+                ),
               ),
 
               const SizedBox(height: 15),
@@ -164,11 +212,17 @@ class Billing extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final bill = billingList[index];
 
-                  return Card(
-                    color: const Color.fromARGB(218, 255, 255, 255),
-                    elevation: 2,
-                    margin: const EdgeInsets.only(bottom: 15),
-
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? Colors.grey.shade900
+                          : const Color(0xffF9FAFB), // ✅ خلفية الفاتورة متجاوبة
+                      borderRadius: BorderRadius.circular(12),
+                      border: isDark
+                          ? Border.all(color: Colors.grey.shade800)
+                          : null,
+                    ),
                     child: Padding(
                       padding: const EdgeInsets.all(15),
 
@@ -180,22 +234,37 @@ class Billing extends StatelessWidget {
                             children: [
                               Text(
                                 bill.date,
-                                style: const TextStyle(color: Colors.grey),
+                                style: TextStyle(
+                                  color: isDark
+                                      ? Colors.grey.shade400
+                                      : Colors.grey, // ✅ متجاوب
+                                  fontSize: 12,
+                                ),
                               ),
 
                               const Text(
                                 "Paid",
-                                style: TextStyle(color: Colors.green),
+                                style: TextStyle(
+                                  color: Colors.green,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
                               ),
                             ],
                           ),
 
-                          const SizedBox(height: 5),
+                          const SizedBox(height: 8),
 
                           Text(
                             bill.title,
-                            style: const TextStyle(fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                              color: textColor, // ✅ متجاوب
+                            ),
                           ),
+
+                          const SizedBox(height: 4),
 
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -205,14 +274,24 @@ class Billing extends StatelessWidget {
                                 style: const TextStyle(
                                   color: Colors.blue,
                                   fontWeight: FontWeight.bold,
+                                  fontSize: 16,
                                 ),
                               ),
 
                               TextButton(
                                 onPressed: () {},
+                                style: TextButton.styleFrom(
+                                  minimumSize: Size.zero,
+                                  padding: EdgeInsets.zero,
+                                  tapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                ),
                                 child: const Text(
                                   "Invoice",
-                                  style: TextStyle(color: Colors.blue),
+                                  style: TextStyle(
+                                    color: Colors.blue,
+                                    fontSize: 13,
+                                  ),
                                 ),
                               ),
                             ],

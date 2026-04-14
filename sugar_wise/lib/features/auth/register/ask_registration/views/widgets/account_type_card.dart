@@ -22,6 +22,10 @@ class AccountTypeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 🔥 استخراج حالة الثيم لضبط الألوان
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.black87;
+
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -29,19 +33,29 @@ class AccountTypeCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).cardColor, // ✅ لون الكارت متجاوب
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            // إذا كان محدداً يأخذ لون الكارت، وإلا يكون رمادياً فاتحاً جداً
-            color: isSelected ? baseColor : Colors.grey.shade200,
+            // إذا كان محدداً يأخذ لون الكارت، وإلا يكون حسب الثيم
+            color: isSelected
+                ? baseColor
+                : (isDark ? Colors.grey.shade800 : Colors.grey.shade200),
             width: isSelected ? 2 : 1.5,
           ),
           boxShadow: [
+            // ✅ إظهار ظل خفيف جداً بلون التحديد فقط إذا كان محدداً
             if (isSelected)
               BoxShadow(
-                color: baseColor.withValues(alpha: 0.1),
+                color: baseColor.withValues(alpha: isDark ? 0.2 : 0.1),
                 blurRadius: 10,
                 spreadRadius: 2,
+              ),
+            // ✅ إذا لم يكن محدداً في الوضع الفاتح فقط نضع ظلاً خفيفاً جداً
+            if (!isSelected && !isDark)
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.02),
+                blurRadius: 8,
+                spreadRadius: 1,
               ),
           ],
         ),
@@ -66,10 +80,10 @@ class AccountTypeCard extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+                          color: textColor, // ✅ متجاوب
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -77,7 +91,9 @@ class AccountTypeCard extends StatelessWidget {
                         subtitle,
                         style: TextStyle(
                           fontSize: 12,
-                          color: Colors.grey.shade500,
+                          color: isDark
+                              ? Colors.grey.shade400
+                              : Colors.grey.shade500, // ✅ متجاوب
                         ),
                       ),
                     ],
@@ -95,11 +111,15 @@ class AccountTypeCard extends StatelessWidget {
                   children: [
                     Icon(Icons.check_circle, size: 16, color: baseColor),
                     const SizedBox(width: 10),
-                    Text(
-                      feature,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: Colors.black87,
+                    Expanded(
+                      child: Text(
+                        feature,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: isDark
+                              ? Colors.grey.shade300
+                              : Colors.black87, // ✅ متجاوب
+                        ),
                       ),
                     ),
                   ],

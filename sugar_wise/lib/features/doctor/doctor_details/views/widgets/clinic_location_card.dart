@@ -1,6 +1,6 @@
-import 'book_appointment_sheet.dart';
 import 'package:flutter/material.dart';
 import '../../models/clinic_model.dart';
+import 'book_appointment_sheet.dart';
 
 class ClinicLocationCard extends StatelessWidget {
   final ClinicModel clinic;
@@ -8,17 +8,28 @@ class ClinicLocationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 🔥 استخراج حالة الثيم لضبط الألوان
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 15),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: Theme.of(context).cardColor, // ✅ متجاوب مع الثيم
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isDark ? Colors.grey[800]! : Colors.grey[200]!,
+          color: isDark
+              ? Colors.grey[800]!
+              : Colors.grey[200]!, // ✅ إطار متجاوب
         ),
+        boxShadow: [
+          if (!isDark) // ✅ إضافة ظل خفيف في الوضع الفاتح فقط لتوحيد التصميم
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
+            ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -33,7 +44,9 @@ class ClinicLocationCard extends StatelessWidget {
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
-                    color: isDark ? Colors.white : Colors.black87,
+                    color: isDark
+                        ? Colors.white
+                        : Colors.black87, // ✅ لون النص متجاوب
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -106,10 +119,6 @@ class ClinicLocationCard extends StatelessWidget {
           const SizedBox(height: 16),
 
           // 4. زر الحجز
-          // في أعلى الملف أضف هذا الاستدعاء:
-
-          // ... (انزل لزر Book Now واستبدله بهذا):
-          // 4. زر الحجز
           SizedBox(
             width: double.infinity,
             height: 45,
@@ -122,12 +131,13 @@ class ClinicLocationCard extends StatelessWidget {
                       true, // مهم جداً لكي تأخذ النافذة الارتفاع الذي تحتاجه
                   backgroundColor: Colors
                       .transparent, // لجعل الحواف العلوية الدائرية تظهر بشكل صحيح
-                  builder: (context) =>
-                      BookAppointmentSheet(clinic: clinic), // تمرير العيادة
+                  builder: (context) => BookAppointmentSheet(clinic: clinic),
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF1976D2),
+                backgroundColor: const Color(
+                  0xFF1976D2,
+                ), // لون الزر الأزرق الثابت
                 foregroundColor: Colors.white,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
@@ -171,7 +181,7 @@ class ClinicLocationCard extends StatelessWidget {
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 12,
-                  color: isDark ? Colors.white : Colors.black87,
+                  color: isDark ? Colors.white : Colors.black87, // ✅ متجاوب
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,

@@ -24,27 +24,38 @@ class CustomTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 🔥 استخراج حالة الثيم
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          label,
-          style: const TextStyle(
+          (label),
+          style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF37474F),
+            // ✅ لون العنوان يتجاوب مع الثيم
+            color: isDark ? Colors.grey.shade300 : const Color(0xFF37474F),
           ),
         ),
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            color: Colors.grey[50],
+            // ✅ لون خلفية الحقل يتجاوب مع الثيم
+            color: isDark ? Colors.grey.shade900 : Colors.grey[50],
             borderRadius: BorderRadius.circular(12),
+            border: isDark
+                ? Border.all(color: Colors.grey.shade800)
+                : null, // إطار خفيف للمظلم
           ),
           child: TextField(
             controller:
                 controller, // 🔥 3. السطر السحري! (بدونه لن يقرأ التطبيق أي حرف تكتبه)
             obscureText: obscureText,
+
+            // ✅ لون النص المكتوب داخل الحقل يتجاوب مع الثيم ليكون مقروءاً دائماً
+            style: TextStyle(color: isDark ? Colors.white : Colors.black87),
 
             // 💡 إضافة احترافية: إذا لم يكن باسوورد، نجعل الكيبورد مناسب للإيميلات
             keyboardType: isPassword
@@ -52,14 +63,21 @@ class CustomTextField extends StatelessWidget {
                 : TextInputType.emailAddress,
 
             decoration: InputDecoration(
-              hintText: hintText,
-              hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
-              prefixIcon: Icon(prefixIcon, color: Colors.grey[500], size: 20),
+              hintText: (hintText),
+              hintStyle: TextStyle(
+                color: isDark ? Colors.grey.shade600 : Colors.grey[400],
+                fontSize: 14,
+              ),
+              prefixIcon: Icon(
+                prefixIcon,
+                color: isDark ? Colors.grey.shade500 : Colors.grey[500],
+                size: 20,
+              ),
               suffixIcon: isPassword
                   ? IconButton(
                       icon: Icon(
                         obscureText ? Icons.visibility_off : Icons.visibility,
-                        color: Colors.grey[400],
+                        color: isDark ? Colors.grey.shade500 : Colors.grey[400],
                         size: 20,
                       ),
                       onPressed: onSuffixTap,

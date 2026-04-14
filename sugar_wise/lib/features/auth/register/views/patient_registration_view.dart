@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sugar_wise/features/auth/register/patient_registration/view_models/patient_registration_view_model.dart';
+import 'package:sugar_wise/features/auth/signin/views/login_view.dart';
 
 class PatientRegistrationView extends StatelessWidget {
   const PatientRegistrationView({super.key});
@@ -19,35 +20,36 @@ class _RegistrationContent extends StatelessWidget {
 
   final Color primaryGreen = const Color(0xFF00C897);
   final Color darkText = const Color(0xFF1D2939);
-  final Color lightGray = const Color(0xFFF8F9FA);
 
   @override
   Widget build(BuildContext context) {
     final viewModel = Provider.of<PatientRegistrationViewModel>(context);
 
-    // ✅ السحر هنا: وضعنا الفورمات في قائمة لنعرض واحدة منها فقط
+    // 🔥 استخراج حالة الثيم لضبط الألوان
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     final List<Widget> stepForms = [
-      _buildStep1Form(context, viewModel),
-      _buildStep2Form(context, viewModel),
-      _buildStep3Form(context, viewModel),
-      _buildStep4Form(context, viewModel),
+      _buildStep1Form(context, viewModel, isDark),
+      _buildStep2Form(context, viewModel, isDark),
+      _buildStep3Form(context, viewModel, isDark),
+      _buildStep4Form(context, viewModel, isDark),
     ];
 
     return Scaffold(
-      backgroundColor: lightGray,
+      backgroundColor: Theme.of(
+        context,
+      ).scaffoldBackgroundColor, // ✅ خلفية متجاوبة
       body: SafeArea(
-        // ✅ تم حذف PageView تماماً واستخدام التخطيط المشترك مرة واحدة
         child: _buildSharedLayout(
           context: context,
           viewModel: viewModel,
-          // التبديل بين الفورمات يتم هنا بنعومة
+          isDark: isDark, // ✅ تمرير الثيم
           formCard: AnimatedSwitcher(
             duration: const Duration(milliseconds: 300),
             transitionBuilder: (Widget child, Animation<double> animation) {
               return FadeTransition(opacity: animation, child: child);
             },
             child: Container(
-              // الـ key ضروري لكي يعمل الأنيميشن
               key: ValueKey<int>(viewModel.currentIndex),
               child: stepForms[viewModel.currentIndex],
             ),
@@ -63,6 +65,7 @@ class _RegistrationContent extends StatelessWidget {
   Widget _buildSharedLayout({
     required BuildContext context,
     required PatientRegistrationViewModel viewModel,
+    required bool isDark,
     required Widget formCard,
   }) {
     return SingleChildScrollView(
@@ -84,29 +87,38 @@ class _RegistrationContent extends StatelessWidget {
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: darkText,
+              color: isDark ? Colors.white : darkText, // ✅ متجاوب
             ),
           ),
           const SizedBox(height: 8),
           Text(
             "Complete your profile in 4 simple steps",
-            style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+            style: TextStyle(
+              color: isDark
+                  ? Colors.grey.shade400
+                  : Colors.grey.shade600, // ✅ متجاوب
+              fontSize: 14,
+            ),
           ),
           const SizedBox(height: 30),
-          _buildDynamicStepper(viewModel.currentIndex),
+          _buildDynamicStepper(viewModel.currentIndex, isDark),
           const SizedBox(height: 30),
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).cardColor, // ✅ لون الكارت متجاوب
               borderRadius: BorderRadius.circular(24),
+              border: isDark
+                  ? Border.all(color: Colors.grey.shade800)
+                  : null, // إطار خفيف للمظلم
               boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.03),
-                  blurRadius: 20,
-                  spreadRadius: 5,
-                  offset: const Offset(0, 10),
-                ),
+                if (!isDark) // ✅ إخفاء الظل في الوضع المظلم
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.03),
+                    blurRadius: 20,
+                    spreadRadius: 5,
+                    offset: const Offset(0, 10),
+                  ),
               ],
             ),
             child: formCard,
@@ -122,6 +134,7 @@ class _RegistrationContent extends StatelessWidget {
   Widget _buildStep1Form(
     BuildContext context,
     PatientRegistrationViewModel viewModel,
+    bool isDark,
   ) {
     return Form(
       key: viewModel.formKeyStep1,
@@ -133,13 +146,16 @@ class _RegistrationContent extends StatelessWidget {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: darkText,
+              color: isDark ? Colors.white : darkText, // ✅ متجاوب
             ),
           ),
           const SizedBox(height: 4),
           Text(
             "Tell us about yourself",
-            style: TextStyle(fontSize: 13, color: Colors.grey.shade500),
+            style: TextStyle(
+              fontSize: 13,
+              color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
+            ),
           ),
           const SizedBox(height: 24),
           Row(
@@ -149,6 +165,7 @@ class _RegistrationContent extends StatelessWidget {
                   label: "First Name *",
                   hint: "John",
                   controller: viewModel.firstNameCtrl,
+                  isDark: isDark,
                 ),
               ),
               const SizedBox(width: 16),
@@ -157,6 +174,7 @@ class _RegistrationContent extends StatelessWidget {
                   label: "Last Name *",
                   hint: "Doe",
                   controller: viewModel.lastNameCtrl,
+                  isDark: isDark,
                 ),
               ),
             ],
@@ -167,18 +185,28 @@ class _RegistrationContent extends StatelessWidget {
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: darkText,
+              color: isDark ? Colors.grey.shade300 : darkText,
             ),
           ),
           const SizedBox(height: 8),
           Row(
             children: [
               Expanded(
-                child: _buildGenderOption("Male", Icons.male, viewModel),
+                child: _buildGenderOption(
+                  "Male",
+                  Icons.male,
+                  viewModel,
+                  isDark,
+                ),
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: _buildGenderOption("Female", Icons.female, viewModel),
+                child: _buildGenderOption(
+                  "Female",
+                  Icons.female,
+                  viewModel,
+                  isDark,
+                ),
               ),
             ],
           ),
@@ -188,6 +216,7 @@ class _RegistrationContent extends StatelessWidget {
             hint: "mm/dd/yyyy",
             controller: viewModel.birthdayCtrl,
             readOnly: true,
+            isDark: isDark,
             suffixIcon: const Icon(Icons.calendar_today, size: 20),
             onTap: () async {
               final picked = await showDatePicker(
@@ -196,8 +225,16 @@ class _RegistrationContent extends StatelessWidget {
                 firstDate: DateTime(1900),
                 lastDate: DateTime.now(),
                 builder: (context, child) => Theme(
+                  // ✅ التقويم يفتح متجاوباً مع الثيم المظلم والفاتح
                   data: Theme.of(context).copyWith(
-                    colorScheme: ColorScheme.light(primary: primaryGreen),
+                    colorScheme: isDark
+                        ? ColorScheme.dark(
+                            primary: primaryGreen,
+                            onPrimary: Colors.white,
+                            surface: Colors.grey.shade900,
+                            onSurface: Colors.white,
+                          )
+                        : ColorScheme.light(primary: primaryGreen),
                   ),
                   child: child!,
                 ),
@@ -214,6 +251,7 @@ class _RegistrationContent extends StatelessWidget {
             hint: "1XXXXXXXXX",
             controller: viewModel.phoneCtrl,
             keyboardType: TextInputType.phone,
+            isDark: isDark,
           ),
           const SizedBox(height: 30),
           _buildPrimaryButton(
@@ -232,6 +270,7 @@ class _RegistrationContent extends StatelessWidget {
   Widget _buildStep2Form(
     BuildContext context,
     PatientRegistrationViewModel viewModel,
+    bool isDark,
   ) {
     return Form(
       key: viewModel.formKeyStep2,
@@ -243,13 +282,16 @@ class _RegistrationContent extends StatelessWidget {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: darkText,
+              color: isDark ? Colors.white : darkText,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             "Create your login credentials",
-            style: TextStyle(fontSize: 13, color: Colors.grey.shade500),
+            style: TextStyle(
+              fontSize: 13,
+              color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
+            ),
           ),
           const SizedBox(height: 24),
           _buildTextField(
@@ -258,6 +300,7 @@ class _RegistrationContent extends StatelessWidget {
             controller: viewModel.emailCtrl,
             keyboardType: TextInputType.emailAddress,
             prefixIcon: Icons.email_outlined,
+            isDark: isDark,
           ),
           const SizedBox(height: 20),
           _buildTextField(
@@ -266,6 +309,7 @@ class _RegistrationContent extends StatelessWidget {
             controller: viewModel.passwordCtrl,
             isObscured: viewModel.isPasswordObscured,
             prefixIcon: Icons.lock_outline,
+            isDark: isDark,
             suffixIcon: IconButton(
               icon: Icon(
                 viewModel.isPasswordObscured
@@ -283,6 +327,7 @@ class _RegistrationContent extends StatelessWidget {
             controller: viewModel.confirmPasswordCtrl,
             isObscured: viewModel.isConfirmPasswordObscured,
             prefixIcon: Icons.lock_outline,
+            isDark: isDark,
             validator: (value) {
               if (value == null || value.isEmpty) return 'Required';
               if (value != viewModel.passwordCtrl.text) {
@@ -304,7 +349,10 @@ class _RegistrationContent extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: _buildPreviousButton(onPressed: viewModel.previousStep),
+                child: _buildPreviousButton(
+                  onPressed: viewModel.previousStep,
+                  isDark: isDark,
+                ),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -327,13 +375,36 @@ class _RegistrationContent extends StatelessWidget {
   Widget _buildStep3Form(
     BuildContext context,
     PatientRegistrationViewModel viewModel,
+    bool isDark,
   ) {
     final List<String> governorates = [
       'Cairo',
       'Alexandria',
       'Giza',
       'Qalyubia',
+      'Port Said',
+      'Suez',
+      'Luxor',
+      'Dakahlia',
+      'Gharbia',
+      'Monufia',
+      'Sharqia',
+      'Beheira',
+      'Damietta',
+      'Matrouh',
+      'Kafr El Sheikh',
       'Faiyum',
+      'Beni Suef',
+      'Minya',
+      'Asyut',
+      'Sohag',
+      'Qena',
+      'Aswan',
+      'Red Sea',
+      'New Valley',
+      'North Sinai',
+      'South Sinai',
+      'Ismailia',
     ];
     return Form(
       key: viewModel.formKeyStep3,
@@ -345,13 +416,16 @@ class _RegistrationContent extends StatelessWidget {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: darkText,
+              color: isDark ? Colors.white : darkText,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             "Where can we reach you?",
-            style: TextStyle(fontSize: 13, color: Colors.grey.shade500),
+            style: TextStyle(
+              fontSize: 13,
+              color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
+            ),
           ),
           const SizedBox(height: 24),
           _buildTextField(
@@ -360,6 +434,7 @@ class _RegistrationContent extends StatelessWidget {
             controller: viewModel.fullAddressCtrl,
             prefixIcon: Icons.location_on_outlined,
             maxLines: 3,
+            isDark: isDark,
           ),
           const SizedBox(height: 20),
           _buildDropdownField(
@@ -369,6 +444,7 @@ class _RegistrationContent extends StatelessWidget {
             value: viewModel.selectedGovernorate,
             items: governorates,
             onChanged: viewModel.setGovernorate,
+            isDark: isDark,
           ),
           const SizedBox(height: 20),
           _buildTextField(
@@ -376,12 +452,16 @@ class _RegistrationContent extends StatelessWidget {
             hint: "Enter your city",
             controller: viewModel.cityCtrl,
             prefixIcon: Icons.location_city_outlined,
+            isDark: isDark,
           ),
           const SizedBox(height: 30),
           Row(
             children: [
               Expanded(
-                child: _buildPreviousButton(onPressed: viewModel.previousStep),
+                child: _buildPreviousButton(
+                  onPressed: viewModel.previousStep,
+                  isDark: isDark,
+                ),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -404,6 +484,7 @@ class _RegistrationContent extends StatelessWidget {
   Widget _buildStep4Form(
     BuildContext context,
     PatientRegistrationViewModel viewModel,
+    bool isDark,
   ) {
     return Form(
       key: viewModel.formKeyStep4,
@@ -415,13 +496,16 @@ class _RegistrationContent extends StatelessWidget {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: darkText,
+              color: isDark ? Colors.white : darkText,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             "Help us understand your health needs",
-            style: TextStyle(fontSize: 13, color: Colors.grey.shade500),
+            style: TextStyle(
+              fontSize: 13,
+              color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
+            ),
           ),
           const SizedBox(height: 24),
           Row(
@@ -433,7 +517,8 @@ class _RegistrationContent extends StatelessWidget {
                   controller: viewModel.weightCtrl,
                   prefixIcon: Icons.scale_outlined,
                   keyboardType: TextInputType.number,
-                  suffixWidget: _buildSuffixText("kg"),
+                  suffixWidget: _buildSuffixText("kg", isDark),
+                  isDark: isDark,
                 ),
               ),
               const SizedBox(width: 16),
@@ -444,7 +529,8 @@ class _RegistrationContent extends StatelessWidget {
                   controller: viewModel.heightCtrl,
                   prefixIcon: Icons.straighten_outlined,
                   keyboardType: TextInputType.number,
-                  suffixWidget: _buildSuffixText("cm"),
+                  suffixWidget: _buildSuffixText("cm", isDark),
+                  isDark: isDark,
                 ),
               ),
             ],
@@ -456,7 +542,7 @@ class _RegistrationContent extends StatelessWidget {
               fontSize: 11,
               fontWeight: FontWeight.bold,
               letterSpacing: 0.5,
-              color: darkText,
+              color: isDark ? Colors.grey.shade400 : darkText,
             ),
           ),
           const SizedBox(height: 12),
@@ -472,28 +558,38 @@ class _RegistrationContent extends StatelessWidget {
                 "Diabetes",
                 Icons.vaccines_outlined,
                 viewModel,
+                isDark,
               ),
               _buildConditionCard(
                 "High Blood Pressure",
                 Icons.monitor_heart_outlined,
                 viewModel,
+                isDark,
               ),
               _buildConditionCard(
                 "Heart Disease",
                 Icons.favorite_border_outlined,
                 viewModel,
+                isDark,
               ),
               _buildConditionCard(
                 "Kidney Disease",
                 Icons.water_drop_outlined,
                 viewModel,
+                isDark,
               ),
               _buildConditionCard(
                 "Thyroid Disorders",
                 Icons.medical_services_outlined,
                 viewModel,
+                isDark,
               ),
-              _buildConditionCard("Asthma", Icons.air_outlined, viewModel),
+              _buildConditionCard(
+                "Asthma",
+                Icons.air_outlined,
+                viewModel,
+                isDark,
+              ),
             ],
           ),
           const SizedBox(height: 30),
@@ -501,7 +597,10 @@ class _RegistrationContent extends StatelessWidget {
             children: [
               Expanded(
                 flex: 2,
-                child: _buildPreviousButton(onPressed: viewModel.previousStep),
+                child: _buildPreviousButton(
+                  onPressed: viewModel.previousStep,
+                  isDark: isDark,
+                ),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -509,7 +608,29 @@ class _RegistrationContent extends StatelessWidget {
                 child: _buildPrimaryButton(
                   text: "Complete Profile",
                   icon: Icons.check_circle,
-                  onPressed: () => viewModel.submitRegistration(context),
+                  onPressed: () async {
+                    // 1. تنفيذ دالة التسجيل (حفظ البيانات في الفيو مودل)
+                    // (إذا كانت الدالة تأخذ وقتاً للاتصال بالسيرفر يمكنك إضافة await هنا)
+                    viewModel.submitRegistration(context);
+
+                    // 2. إظهار رسالة ترحيبية صغيرة
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("Account Created Successfully! 🎉"),
+                        backgroundColor: Color(0xFF00C897),
+                      ),
+                    );
+
+                    // 3. الانتقال إلى شاشة تسجيل الدخول وإغلاق جميع الشاشات السابقة
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const LoginView(),
+                      ),
+                      (route) =>
+                          false, // هذه السطر هو الذي يمسح الشاشات السابقة
+                    );
+                  },
                 ),
               ),
             ],
@@ -523,7 +644,7 @@ class _RegistrationContent extends StatelessWidget {
   // دوال مساعدة (Helpers)
   // ==========================================
 
-  Widget _buildDynamicStepper(int currentIndex) {
+  Widget _buildDynamicStepper(int currentIndex, bool isDark) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -532,13 +653,26 @@ class _RegistrationContent extends StatelessWidget {
           "Personal Info",
           currentIndex >= 0,
           currentIndex > 0,
+          isDark,
         ),
-        _buildStepDivider(currentIndex >= 1),
-        _buildStepItem("2", "Account", currentIndex >= 1, currentIndex > 1),
-        _buildStepDivider(currentIndex >= 2),
-        _buildStepItem("3", "Address", currentIndex >= 2, currentIndex > 2),
-        _buildStepDivider(currentIndex >= 3),
-        _buildStepItem("4", "Health", currentIndex >= 3, false),
+        _buildStepDivider(currentIndex >= 1, isDark),
+        _buildStepItem(
+          "2",
+          "Account",
+          currentIndex >= 1,
+          currentIndex > 1,
+          isDark,
+        ),
+        _buildStepDivider(currentIndex >= 2, isDark),
+        _buildStepItem(
+          "3",
+          "Address",
+          currentIndex >= 2,
+          currentIndex > 2,
+          isDark,
+        ),
+        _buildStepDivider(currentIndex >= 3, isDark),
+        _buildStepItem("4", "Health", currentIndex >= 3, false, isDark),
       ],
     );
   }
@@ -548,6 +682,7 @@ class _RegistrationContent extends StatelessWidget {
     String title,
     bool isActive,
     bool isCompleted,
+    bool isDark,
   ) {
     return Column(
       children: [
@@ -555,10 +690,16 @@ class _RegistrationContent extends StatelessWidget {
           width: 30,
           height: 30,
           decoration: BoxDecoration(
-            color: isCompleted || isActive ? primaryGreen : Colors.white,
+            color: isCompleted || isActive
+                ? primaryGreen
+                : (isDark ? Colors.grey.shade800 : Colors.white), // ✅ متجاوب
             shape: BoxShape.circle,
             border: Border.all(
-              color: isActive ? primaryGreen : Colors.grey.shade300,
+              color: isActive
+                  ? primaryGreen
+                  : (isDark
+                        ? Colors.grey.shade700
+                        : Colors.grey.shade300), // ✅ متجاوب
             ),
           ),
           alignment: Alignment.center,
@@ -567,7 +708,11 @@ class _RegistrationContent extends StatelessWidget {
               : Text(
                   step,
                   style: TextStyle(
-                    color: isActive ? Colors.white : Colors.grey.shade500,
+                    color: isActive
+                        ? Colors.white
+                        : (isDark
+                              ? Colors.grey.shade400
+                              : Colors.grey.shade500),
                     fontWeight: FontWeight.bold,
                     fontSize: 12,
                   ),
@@ -577,7 +722,9 @@ class _RegistrationContent extends StatelessWidget {
         Text(
           title,
           style: TextStyle(
-            color: isActive ? primaryGreen : Colors.grey.shade400,
+            color: isActive
+                ? primaryGreen
+                : (isDark ? Colors.grey.shade500 : Colors.grey.shade400),
             fontSize: 9,
             fontWeight: FontWeight.bold,
           ),
@@ -586,18 +733,21 @@ class _RegistrationContent extends StatelessWidget {
     );
   }
 
-  Widget _buildStepDivider(bool isActive) {
+  Widget _buildStepDivider(bool isActive, bool isDark) {
     return Container(
       width: 30,
       height: 2,
       margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
-      color: isActive ? primaryGreen : Colors.grey.shade300,
+      color: isActive
+          ? primaryGreen
+          : (isDark ? Colors.grey.shade800 : Colors.grey.shade300),
     );
   }
 
   Widget _buildTextField({
     required String label,
     required String hint,
+    required bool isDark, // ✅ استقبال الثيم
     TextEditingController? controller,
     bool isObscured = false,
     IconData? prefixIcon,
@@ -617,7 +767,7 @@ class _RegistrationContent extends StatelessWidget {
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: darkText,
+            color: isDark ? Colors.grey.shade300 : darkText, // ✅ متجاوب
           ),
         ),
         const SizedBox(height: 8),
@@ -628,12 +778,18 @@ class _RegistrationContent extends StatelessWidget {
           onTap: onTap,
           keyboardType: keyboardType,
           maxLines: maxLines,
+          style: TextStyle(
+            color: isDark ? Colors.white : Colors.black87,
+          ), // ✅ لون النص
           validator:
               validator ??
               (value) => value == null || value.isEmpty ? 'Required' : null,
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+            hintStyle: TextStyle(
+              color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
+              fontSize: 14,
+            ),
             prefixIcon: prefixIcon != null
                 ? Padding(
                     padding: EdgeInsets.only(
@@ -641,25 +797,33 @@ class _RegistrationContent extends StatelessWidget {
                     ),
                     child: Icon(
                       prefixIcon,
-                      color: Colors.grey.shade400,
+                      color: isDark
+                          ? Colors.grey.shade500
+                          : Colors.grey.shade400,
                       size: 20,
                     ),
                   )
                 : null,
             suffixIcon: suffixIcon ?? suffixWidget,
             filled: true,
-            fillColor: Colors.white,
+            fillColor: isDark
+                ? Colors.grey.shade900
+                : Colors.white, // ✅ خلفية متجاوبة
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 14,
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade200),
+              borderSide: BorderSide(
+                color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+              ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade200),
+              borderSide: BorderSide(
+                color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+              ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -678,6 +842,7 @@ class _RegistrationContent extends StatelessWidget {
     required String? value,
     required List<String> items,
     required void Function(String?) onChanged,
+    required bool isDark, // ✅ استقبال الثيم
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -687,29 +852,48 @@ class _RegistrationContent extends StatelessWidget {
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: darkText,
+            color: isDark ? Colors.grey.shade300 : darkText, // ✅ متجاوب
           ),
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
-          value:
-              value, // ❌ تم استبدال initialValue بـ value لأن هذا هو الصحيح هنا
-          icon: Icon(Icons.keyboard_arrow_down, color: Colors.grey.shade400),
+          initialValue: value,
+          icon: Icon(
+            Icons.keyboard_arrow_down,
+            color: isDark ? Colors.grey.shade500 : Colors.grey.shade400,
+          ),
+          style: TextStyle(
+            color: isDark ? Colors.white : Colors.black87,
+            fontSize: 14,
+          ), // ✅ لون النص متجاوب
+          dropdownColor: isDark
+              ? Colors.grey.shade900
+              : Colors.white, // ✅ لون القائمة
           decoration: InputDecoration(
-            prefixIcon: Icon(prefixIcon, color: Colors.grey.shade400, size: 20),
+            prefixIcon: Icon(
+              prefixIcon,
+              color: isDark ? Colors.grey.shade500 : Colors.grey.shade400,
+              size: 20,
+            ),
             filled: true,
-            fillColor: Colors.white,
+            fillColor: isDark
+                ? Colors.grey.shade900
+                : Colors.white, // ✅ خلفية متجاوبة
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 14,
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade200),
+              borderSide: BorderSide(
+                color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+              ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade200),
+              borderSide: BorderSide(
+                color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+              ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -718,7 +902,10 @@ class _RegistrationContent extends StatelessWidget {
           ),
           hint: Text(
             hint,
-            style: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+            style: TextStyle(
+              color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
+              fontSize: 14,
+            ),
           ),
           validator: (val) => val == null ? 'Required' : null,
           items: items
@@ -735,13 +922,13 @@ class _RegistrationContent extends StatelessWidget {
     );
   }
 
-  Widget _buildSuffixText(String text) {
+  Widget _buildSuffixText(String text, bool isDark) {
     return Padding(
       padding: const EdgeInsets.only(right: 16, top: 14),
       child: Text(
         text,
         style: TextStyle(
-          color: Colors.grey.shade500,
+          color: isDark ? Colors.grey.shade500 : Colors.grey.shade500,
           fontSize: 13,
           fontWeight: FontWeight.w600,
         ),
@@ -753,6 +940,7 @@ class _RegistrationContent extends StatelessWidget {
     String title,
     IconData icon,
     PatientRegistrationViewModel viewModel,
+    bool isDark,
   ) {
     bool isSelected = viewModel.selectedConditions.contains(title);
     return GestureDetector(
@@ -762,10 +950,12 @@ class _RegistrationContent extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? primaryGreen.withValues(alpha: 0.05)
-              : Colors.white,
+              : (isDark ? Colors.grey.shade900 : Colors.white), // ✅ متجاوب
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? primaryGreen : Colors.grey.shade200,
+            color: isSelected
+                ? primaryGreen
+                : (isDark ? Colors.grey.shade800 : Colors.grey.shade200),
             width: isSelected ? 1.5 : 1,
           ),
         ),
@@ -774,7 +964,9 @@ class _RegistrationContent extends StatelessWidget {
           children: [
             Icon(
               icon,
-              color: isSelected ? primaryGreen : Colors.grey.shade400,
+              color: isSelected
+                  ? primaryGreen
+                  : (isDark ? Colors.grey.shade500 : Colors.grey.shade400),
               size: 22,
             ),
             const SizedBox(height: 6),
@@ -782,7 +974,9 @@ class _RegistrationContent extends StatelessWidget {
               title,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: isSelected ? primaryGreen : Colors.grey.shade600,
+                color: isSelected
+                    ? primaryGreen
+                    : (isDark ? Colors.grey.shade400 : Colors.grey.shade600),
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                 fontSize: 10,
               ),
@@ -797,6 +991,7 @@ class _RegistrationContent extends StatelessWidget {
     String title,
     IconData icon,
     PatientRegistrationViewModel viewModel,
+    bool isDark,
   ) {
     bool isSelected = viewModel.gender == title;
     return GestureDetector(
@@ -807,10 +1002,12 @@ class _RegistrationContent extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? primaryGreen.withValues(alpha: 0.05)
-              : Colors.white,
+              : (isDark ? Colors.grey.shade900 : Colors.white), // ✅ متجاوب
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? primaryGreen : Colors.grey.shade200,
+            color: isSelected
+                ? primaryGreen
+                : (isDark ? Colors.grey.shade800 : Colors.grey.shade200),
             width: 1.5,
           ),
         ),
@@ -819,14 +1016,18 @@ class _RegistrationContent extends StatelessWidget {
           children: [
             Icon(
               icon,
-              color: isSelected ? primaryGreen : Colors.grey.shade500,
+              color: isSelected
+                  ? primaryGreen
+                  : (isDark ? Colors.grey.shade500 : Colors.grey.shade500),
               size: 18,
             ),
             const SizedBox(width: 8),
             Text(
               title,
               style: TextStyle(
-                color: isSelected ? primaryGreen : Colors.grey.shade600,
+                color: isSelected
+                    ? primaryGreen
+                    : (isDark ? Colors.white : Colors.grey.shade600),
                 fontWeight: FontWeight.bold,
                 fontSize: 14,
               ),
@@ -837,7 +1038,6 @@ class _RegistrationContent extends StatelessWidget {
     );
   }
 
-  // ✅ تم تحديث زر الأساسي ليقوم بتصغير محتواه تلقائياً في الشاشات الصغيرة
   Widget _buildPrimaryButton({
     required String text,
     required IconData icon,
@@ -852,14 +1052,11 @@ class _RegistrationContent extends StatelessWidget {
           backgroundColor: primaryGreen,
           foregroundColor: Colors.white,
           elevation: 0,
-          padding: const EdgeInsets.symmetric(
-            horizontal: 8,
-          ), // تقليل الحواف الداخلية لزيادة المساحة للنص
+          padding: const EdgeInsets.symmetric(horizontal: 8),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
         ),
-        // ✅ إضافة السحر هنا (FittedBox)
         child: FittedBox(
           fit: BoxFit.scaleDown,
           child: Row(
@@ -872,9 +1069,7 @@ class _RegistrationContent extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(
-                width: 6,
-              ), // تقليل المسافة بين النص والأيقونة قليلاً
+              const SizedBox(width: 6),
               Icon(icon, size: 16),
             ],
           ),
@@ -883,22 +1078,25 @@ class _RegistrationContent extends StatelessWidget {
     );
   }
 
-  // ✅ تم تحديث زر العودة ليقوم بتصغير محتواه أيضاً
-  Widget _buildPreviousButton({required VoidCallback onPressed}) {
+  Widget _buildPreviousButton({
+    required VoidCallback onPressed,
+    required bool isDark,
+  }) {
     return SizedBox(
       width: double.infinity,
       height: 50,
       child: OutlinedButton(
         onPressed: onPressed,
         style: OutlinedButton.styleFrom(
-          foregroundColor: darkText,
-          side: BorderSide(color: Colors.grey.shade300),
+          foregroundColor: isDark ? Colors.white : darkText, // ✅ النص والأيقونة
+          side: BorderSide(
+            color: isDark ? Colors.grey.shade700 : Colors.grey.shade300,
+          ), // ✅ الإطار
           padding: const EdgeInsets.symmetric(horizontal: 8),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
         ),
-        // ✅ إضافة السحر هنا (FittedBox)
         child: FittedBox(
           fit: BoxFit.scaleDown,
           child: Row(

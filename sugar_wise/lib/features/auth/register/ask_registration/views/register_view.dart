@@ -23,10 +23,14 @@ class _RegisterContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final viewModel = Provider.of<RegisterViewModel>(context);
 
+    // 🔥 استخراج حالة الثيم لضبط الألوان
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.black87;
+
     return Scaffold(
-      backgroundColor: const Color(
-        0xFFF8F9FA,
-      ), // لون الخلفية الرمادي الفاتح جداً
+      backgroundColor: Theme.of(
+        context,
+      ).scaffoldBackgroundColor, // ✅ لون الخلفية متجاوب
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
@@ -51,34 +55,45 @@ class _RegisterContent extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 10),
-                  const Text(
+                  Text(
                     "DiabetesCare",
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: textColor, // ✅ متجاوب
+                    ),
                   ),
                 ],
               ),
               const SizedBox(height: 8),
               Text(
                 "Join our health community",
-                style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                style: TextStyle(
+                  color: isDark
+                      ? Colors.grey[400]
+                      : Colors.grey.shade600, // ✅ متجاوب
+                  fontSize: 13,
+                ),
               ),
               const SizedBox(height: 40),
 
               // 2. العنوان
-              const Text(
+              Text(
                 "Create Your Account",
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: textColor, // ✅ متجاوب
                 ),
               ),
               const SizedBox(height: 10),
               Text(
-                "Select your account type to get started. Choose\ncarefully as this determines your experience.",
+                ("Select your account type to get started. Choose\ncarefully as this determines your experience."),
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Colors.grey.shade500,
+                  color: isDark
+                      ? Colors.grey[500]
+                      : Colors.grey.shade500, // ✅ متجاوب
                   fontSize: 13,
                   height: 1.4,
                 ),
@@ -103,7 +118,7 @@ class _RegisterContent extends StatelessWidget {
 
               // 4. كارت الطبيب
               AccountTypeCard(
-                title: "Doctor Account", // تم تصحيح Moctor إلى Doctor
+                title: "Doctor Account",
                 subtitle: "Healthcare professionals",
                 icon: Icons.medical_services,
                 baseColor: const Color(0xFF2196F3), // لون أزرق
@@ -140,13 +155,14 @@ class _RegisterContent extends StatelessWidget {
                         }
                       : null, // الزر سيكون معطلاً (Disabled) إذا لم يتم الاختيار
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(
-                      0xFFE8EDF2,
-                    ), // لون الزر المعطل أو الفاتح
-                    foregroundColor: const Color(0xFF5A7184), // لون النص
-                    disabledBackgroundColor: const Color(
-                      0xFFE8EDF2,
-                    ).withValues(alpha: 0.6),
+                    backgroundColor: isDark
+                        ? Colors.grey[800]
+                        : const Color(0xFFE8EDF2), // ✅ خلفية الزر متجاوبة
+                    disabledBackgroundColor: isDark
+                        ? Colors.grey[900]
+                        : const Color(0xFFE8EDF2).withValues(
+                            alpha: 0.6,
+                          ), // ✅ خلفية الزر في حالة التعطيل متجاوبة
                     elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(15),
@@ -156,14 +172,16 @@ class _RegisterContent extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        "Continue to Registration",
+                        ("Continue to Registration"),
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          // يتغير لون النص إذا تم التفعيل
+                          // ✅ ألوان النص تتغير حسب الثيم وحالة التفعيل
                           color: viewModel.canContinue
                               ? const Color(0xFF1976D2)
-                              : const Color(0xFF9EAAB6),
+                              : (isDark
+                                    ? Colors.grey[600]
+                                    : const Color(0xFF9EAAB6)),
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -172,7 +190,9 @@ class _RegisterContent extends StatelessWidget {
                         size: 18,
                         color: viewModel.canContinue
                             ? const Color(0xFF1976D2)
-                            : const Color(0xFF9EAAB6),
+                            : (isDark
+                                  ? Colors.grey[600]
+                                  : const Color(0xFF9EAAB6)),
                       ),
                     ],
                   ),
@@ -186,11 +206,18 @@ class _RegisterContent extends StatelessWidget {
                 icon: Icon(
                   Icons.arrow_back,
                   size: 16,
-                  color: Colors.grey.shade600,
+                  color: isDark
+                      ? Colors.grey[400]
+                      : Colors.grey.shade600, // ✅ متجاوب
                 ),
                 label: Text(
                   "Back to Login",
-                  style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+                  style: TextStyle(
+                    color: isDark
+                        ? Colors.grey[400]
+                        : Colors.grey.shade600, // ✅ متجاوب
+                    fontSize: 14,
+                  ),
                 ),
               ),
             ],

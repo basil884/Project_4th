@@ -6,27 +6,34 @@ class LanguageScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
-    double height = MediaQuery.of(context).size.height;
+    // 🔥 استخراج حالة الثيم لضبط الألوان
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.black87;
 
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor, // ✅ متجاوب
+
       appBar: AppBar(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor, // ✅ متجاوب
+        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: textColor, // ✅ متجاوب
+            size: 20,
+          ),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
-        title: const Text(
+        title: Text(
           "Language Settings",
-          style: TextStyle(fontWeight: FontWeight.w800),
+          style: TextStyle(
+            fontWeight: FontWeight.w800,
+            color: textColor, // ✅ متجاوب
+          ),
         ),
-        elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
       ),
-
-      backgroundColor: const Color(0xffF5F6FA),
 
       body: const LanguageCard(),
     );

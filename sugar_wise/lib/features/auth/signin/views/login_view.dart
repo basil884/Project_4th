@@ -21,27 +21,34 @@ class _LoginContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 🔥 استخراج حالة الثيم
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      // لون الخلفية الداكن (الجزء العلوي)
-      backgroundColor: const Color(0xFF37474F),
+      // ✅ لون الخلفية الداكن (الجزء العلوي) يتجاوب مع الثيم
+      backgroundColor: isDark
+          ? const Color(0xFF1A1A1A)
+          : const Color(0xFF37474F),
       body: SafeArea(
-        bottom: false, // ليمتد اللون الأبيض لأسفل الشاشة
+        bottom: false, // ليمتد اللون لأسفل الشاشة
         child: Column(
           children: [
             const SizedBox(height: 30), // مسافة من الأعلى
-            // الجزء الأبيض المنحني
+            // الجزء السفلي المنحني
             Expanded(
               child: Container(
                 width: double.infinity,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFFAFAFA), // لون أبيض مائل للرمادي الفاتح جداً
-                  borderRadius: BorderRadius.only(
+                decoration: BoxDecoration(
+                  // ✅ لون الجزء المنحني يقرأ من الثيم مباشرة
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                  borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(30),
                     topRight: Radius.circular(30),
                   ),
                 ),
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(24.0),
+                  // إزالة const من هنا لأن بداخلها عناصر قد تحتاج للسياق (context) مستقبلاً
                   child: Column(
                     children: const [
                       SizedBox(height: 20),

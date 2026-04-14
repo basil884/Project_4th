@@ -54,14 +54,29 @@ class _DoctorViewState extends State<DoctorView> {
     // نحصل على القائمة المفلترة لعرضها بدلاً من القائمة الكاملة
     final displayDoctors = filteredDoctors;
 
+    // 🔥 استخراج حالة الثيم والألوان
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.black87;
+
     return Scaffold(
+      backgroundColor: Theme.of(
+        context,
+      ).scaffoldBackgroundColor, // ✅ خلفية متجاوبة
       appBar: AppBar(
+        backgroundColor: Theme.of(
+          context,
+        ).scaffoldBackgroundColor, // ✅ لون الشريط متجاوب
+        elevation: 0,
+        iconTheme: IconThemeData(color: textColor), // ✅ لون سهم الرجوع متجاوب
         title: Text(
-          'Find the Best Doctors',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          ('Find the Best Doctors'),
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: textColor, // ✅ لون العنوان متجاوب
+          ),
         ),
       ),
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -73,8 +88,21 @@ class _DoctorViewState extends State<DoctorView> {
                 children: [
                   Container(
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
+                      color: Theme.of(
+                        context,
+                      ).cardColor, // ✅ لون خلفية حقل البحث متجاوب
                       borderRadius: BorderRadius.circular(12),
+                      border: isDark
+                          ? Border.all(color: Colors.grey.shade800)
+                          : null, // إطار خفيف في المظلم
+                      boxShadow: [
+                        if (!isDark) // ظل خفيف في الفاتح
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                      ],
                     ),
                     child: TextField(
                       onChanged: (value) {
@@ -82,19 +110,32 @@ class _DoctorViewState extends State<DoctorView> {
                           searchQuery = value;
                         });
                       },
-                      decoration: const InputDecoration(
-                        hintText: "Search for doctors, specialties...",
-                        hintStyle: TextStyle(color: Colors.grey, fontSize: 14),
-                        prefixIcon: Icon(Icons.search, color: Colors.grey),
+                      style: TextStyle(color: textColor), // ✅ لون النص المكتوب
+                      decoration: InputDecoration(
+                        hintText: ("Search for doctors, specialties..."),
+                        hintStyle: TextStyle(
+                          color: isDark
+                              ? Colors.grey[500]
+                              : Colors.grey, // ✅ لون الـ Hint
+                          fontSize: 14,
+                        ),
+                        prefixIcon: Icon(
+                          Icons.search,
+                          color: isDark
+                              ? Colors.grey[400]
+                              : Colors.grey, // ✅ لون أيقونة البحث
+                        ),
                         border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(vertical: 14),
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 14,
+                        ),
                       ),
                     ),
                   ),
                 ],
               ),
             ),
-
+            const SizedBox(height: 16), // ✅ مسافة إضافية لترتيب الشكل
             // 🌟 التعديل الخامس: تفعيل أزرار التخصصات
             SizedBox(
               height: 40,
@@ -108,8 +149,8 @@ class _DoctorViewState extends State<DoctorView> {
                   return _buildCategoryChip(
                     title: category,
                     isActive: selectedSpecialty == category,
+                    isDark: isDark, // تمرير حالة الثيم للزر
                     onTap: () {
-                      // عند الضغط على التخصص، يتم تحديث المتغير وإعادة رسم الشاشة
                       setState(() {
                         selectedSpecialty = category;
                       });
@@ -123,20 +164,22 @@ class _DoctorViewState extends State<DoctorView> {
             // 🌟 التعديل السادس: عرض الأطباء بعد الفلترة
             Expanded(
               child: displayDoctors.isEmpty
-                  // إذا لم نجد أطباء يطابقون البحث، نعرض رسالة للمستخدم
-                  ? const Center(
+                  ? Center(
                       child: Text(
                         "No doctors found.",
-                        style: TextStyle(color: Colors.grey, fontSize: 16),
+                        style: TextStyle(
+                          color: isDark
+                              ? Colors.grey[500]
+                              : Colors.grey, // ✅ لون رسالة عدم العثور متجاوب
+                          fontSize: 16,
+                        ),
                       ),
                     )
-                  // إذا وجدنا أطباء، نعرضهم في القائمة
                   : ListView.builder(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       physics: const BouncingScrollPhysics(),
                       itemCount: displayDoctors.length,
                       itemBuilder: (context, index) {
-                        // نستخدم القائمة المفلترة (displayDoctors) بدلاً من القائمة الشاملة
                         return DoctorCard(doctor: displayDoctors[index]);
                       },
                     ),
@@ -147,26 +190,42 @@ class _DoctorViewState extends State<DoctorView> {
     );
   }
 
-  // أداة مساعدة لبناء أزرار التخصصات (تم تعديلها لتصبح قابلة للضغط)
+  // ✅ أداة مساعدة لبناء أزرار التخصصات متجاوبة مع الثيم
   Widget _buildCategoryChip({
     required String title,
     required bool isActive,
+    required bool isDark, // استقبال حالة الثيم
     required VoidCallback onTap,
   }) {
+    // تحديد الألوان بناءً على حالة النشاط وحالة الثيم
+    Color activeBgColor = isDark ? Colors.blue.shade700 : Colors.blue.shade600;
+    Color inactiveBgColor = isDark
+        ? Colors.grey.shade800
+        : Colors.grey.shade100;
+    Color activeTextColor = Colors.white;
+    Color inactiveTextColor = isDark
+        ? Colors.grey.shade300
+        : Colors.grey.shade800;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.only(right: 10),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isActive ? Colors.blue.shade600 : Colors.grey.shade100,
+          color: isActive ? activeBgColor : inactiveBgColor, // ✅ لون الزر يتغير
           borderRadius: BorderRadius.circular(20),
+          border: isDark && !isActive
+              ? Border.all(color: Colors.grey.shade700)
+              : null, // إطار خفيف للغير نشط في المظلم
         ),
         child: Center(
           child: Text(
             title,
             style: TextStyle(
-              color: isActive ? Colors.white : Colors.grey.shade800,
+              color: isActive
+                  ? activeTextColor
+                  : inactiveTextColor, // ✅ لون نص الزر يتغير
               fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
             ),
           ),

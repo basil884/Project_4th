@@ -2,30 +2,44 @@ import 'package:flutter/material.dart';
 
 class AddPyment extends StatelessWidget {
   const AddPyment({super.key});
+
   @override
   Widget build(BuildContext context) {
+    // 🔥 استخراج حالة الثيم لضبط الألوان
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.black87;
+    final fieldBgColor = isDark
+        ? Colors.grey.shade900
+        : const Color(0xffF5F6FA);
+    final iconColor = isDark ? Colors.grey.shade500 : Colors.grey.shade700;
+
     return Container(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
-
       child: Container(
         padding: const EdgeInsets.all(20),
-
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+        decoration: BoxDecoration(
+          color: Theme.of(
+            context,
+          ).scaffoldBackgroundColor, // ✅ خلفية النافذة متجاوبة
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
+          border: isDark
+              ? Border(top: BorderSide(color: Colors.grey.shade800))
+              : null,
         ),
-
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // الشريط العلوي الصغير (Drag handle)
             Container(
               width: 40,
               height: 4,
               margin: const EdgeInsets.only(bottom: 20),
               decoration: BoxDecoration(
-                color: Colors.grey[300],
+                color: isDark
+                    ? Colors.grey.shade700
+                    : Colors.grey[300], // ✅ متجاوب
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
@@ -33,18 +47,26 @@ class AddPyment extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   "Add Payment Method",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: textColor, // ✅ متجاوب
+                  ),
                 ),
-
                 CircleAvatar(
                   radius: 14,
-                  backgroundColor: Colors.grey[200],
-
+                  backgroundColor: isDark
+                      ? Colors.grey.shade800
+                      : Colors.grey[200], // ✅ متجاوب
                   child: IconButton(
                     padding: EdgeInsets.zero,
-                    icon: const Icon(Icons.close, size: 16),
+                    icon: Icon(
+                      Icons.close,
+                      size: 16,
+                      color: isDark ? Colors.white : Colors.black87,
+                    ), // ✅ متجاوب
                     onPressed: () {
                       Navigator.pop(context);
                     },
@@ -52,101 +74,158 @@ class AddPyment extends StatelessWidget {
                 ),
               ],
             ),
-
             const SizedBox(height: 20),
 
+            // Name Field
             TextField(
+              style: TextStyle(color: textColor), // ✅ لون النص المدخل
               decoration: InputDecoration(
                 hintText: "e.g. Ahmed Mohamed",
+                hintStyle: TextStyle(
+                  color: isDark ? Colors.grey.shade600 : Colors.grey.shade500,
+                ),
                 filled: true,
-                fillColor: const Color(0xffF5F6FA),
-
+                fillColor: fieldBgColor, // ✅ متجاوب
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
+                  borderSide: isDark
+                      ? BorderSide(color: Colors.grey.shade800)
+                      : BorderSide.none,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: isDark
+                      ? BorderSide(color: Colors.grey.shade800)
+                      : BorderSide.none,
                 ),
               ),
             ),
-
             const SizedBox(height: 15),
 
+            // Card Number Field
             TextField(
+              style: TextStyle(color: textColor), // ✅ لون النص المدخل
+              keyboardType: TextInputType.number,
               decoration: InputDecoration(
                 hintText: "0000 0000 0000 0000",
-                prefixIcon: const Icon(Icons.credit_card),
+                hintStyle: TextStyle(
+                  color: isDark ? Colors.grey.shade600 : Colors.grey.shade500,
+                ),
+                prefixIcon: Icon(
+                  Icons.credit_card,
+                  color: iconColor,
+                ), // ✅ أيقونة متجاوبة
                 filled: true,
-                fillColor: const Color(0xffF5F6FA),
-
+                fillColor: fieldBgColor, // ✅ متجاوب
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
+                  borderSide: isDark
+                      ? BorderSide(color: Colors.grey.shade800)
+                      : BorderSide.none,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: isDark
+                      ? BorderSide(color: Colors.grey.shade800)
+                      : BorderSide.none,
                 ),
               ),
             ),
-
             const SizedBox(height: 15),
 
+            // Expiry & CVV Row
             Row(
               children: [
                 Expanded(
                   child: TextField(
+                    style: TextStyle(color: textColor), // ✅ لون النص المدخل
+                    keyboardType: TextInputType.datetime,
                     decoration: InputDecoration(
                       hintText: "MM/YY",
-                      prefixIcon: const Icon(Icons.date_range),
+                      hintStyle: TextStyle(
+                        color: isDark
+                            ? Colors.grey.shade600
+                            : Colors.grey.shade500,
+                      ),
+                      prefixIcon: Icon(Icons.date_range, color: iconColor),
                       filled: true,
-                      fillColor: const Color(0xffF5F6FA),
-
+                      fillColor: fieldBgColor, // ✅ متجاوب
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
+                        borderSide: isDark
+                            ? BorderSide(color: Colors.grey.shade800)
+                            : BorderSide.none,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: isDark
+                            ? BorderSide(color: Colors.grey.shade800)
+                            : BorderSide.none,
                       ),
                     ),
                   ),
                 ),
-
                 const SizedBox(width: 10),
-
                 Expanded(
                   child: TextField(
+                    style: TextStyle(color: textColor), // ✅ لون النص المدخل
+                    keyboardType: TextInputType.number,
+                    obscureText: true,
                     decoration: InputDecoration(
-                      hintText: "123",
-                      prefixIcon: const Icon(Icons.lock),
+                      hintText: "CVV", // الأفضل كتابة CVV بدلاً من 123 كـ Hint
+                      hintStyle: TextStyle(
+                        color: isDark
+                            ? Colors.grey.shade600
+                            : Colors.grey.shade500,
+                      ),
+                      prefixIcon: Icon(Icons.lock_outline, color: iconColor),
                       filled: true,
-                      fillColor: const Color(0xffF5F6FA),
-
+                      fillColor: fieldBgColor, // ✅ متجاوب
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
+                        borderSide: isDark
+                            ? BorderSide(color: Colors.grey.shade800)
+                            : BorderSide.none,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: isDark
+                            ? BorderSide(color: Colors.grey.shade800)
+                            : BorderSide.none,
                       ),
                     ),
                   ),
                 ),
               ],
             ),
-
             const SizedBox(height: 20),
 
+            // Save Button
             SizedBox(
               width: double.infinity,
-
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xff2563EB),
                   padding: const EdgeInsets.symmetric(vertical: 15),
-
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
+                  elevation: isDark ? 0 : 2, // تقليل الظل في الوضع المظلم
                 ),
-
-                onPressed: () {},
-
+                onPressed: () {
+                  Navigator.pop(context); // إغلاق النافذة عند الحفظ
+                },
                 child: const Text(
                   "Save Card",
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
                 ),
               ),
             ),
+            const SizedBox(height: 10), // مسافة صغيرة من الأسفل للأمان
           ],
         ),
       ),

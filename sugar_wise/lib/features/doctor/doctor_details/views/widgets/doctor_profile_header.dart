@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sugar_wise/features/doctor/doctor_details/view_models/doctor_details_view_model.dart';
-import 'package:sugar_wise/features/patient/patient_chats/views/patient_chats_view.dart';
-import 'package:sugar_wise/features/patient/patient_chats/models/chat_thread_model.dart';
-import 'package:sugar_wise/features/patient/patient_chats/views/chat_view.dart';
+import 'package:sugar_wise/features/patient/chat_patient/patient_chats_to_doctor/views/patient_chats_view.dart';
+import 'package:sugar_wise/features/patient/chat_patient/patient_chats_to_doctor/models/chat_thread_model.dart';
+import 'package:sugar_wise/features/patient/chat_patient/patient_chats_to_doctor/views/chat_view.dart';
 
 class DoctorProfileHeader extends StatelessWidget {
   const DoctorProfileHeader({super.key});

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart'; // ✅ استدعاء المكتبة
 import 'package:sugar_wise/features/patient/language_screen/widgets/langue_item.dart';
 
 class LanguageCard extends StatefulWidget {
@@ -9,22 +10,36 @@ class LanguageCard extends StatefulWidget {
 }
 
 class _LanguageCardState extends State<LanguageCard> {
-  String selectedLanguage = "Arabic";
+  // ✅ نجعل اللغة المحددة افتراضياً هي لغة التطبيق الحالية
+  late String selectedLanguage;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    selectedLanguage = context.locale.languageCode == 'ar'
+        ? 'Arabic'
+        : 'English';
+  }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.black87;
+
     return Container(
       padding: const EdgeInsets.all(20),
       margin: const EdgeInsets.all(25),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(25),
+        border: isDark ? Border.all(color: Colors.grey.shade800) : null,
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
+          if (!isDark)
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
         ],
       ),
       child: Column(
@@ -37,7 +52,9 @@ class _LanguageCardState extends State<LanguageCard> {
                 width: 38,
                 height: 38,
                 decoration: BoxDecoration(
-                  color: const Color(0xff2563EB).withOpacity(0.1),
+                  color: const Color(
+                    0xff2563EB,
+                  ).withValues(alpha: isDark ? 0.2 : 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Center(
@@ -50,10 +67,14 @@ class _LanguageCardState extends State<LanguageCard> {
                 ),
               ),
               const SizedBox(width: 12),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  "Language Settings",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  "language_settings".tr(), // ✅ الترجمة السحرية
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: textColor,
+                  ),
                 ),
               ),
             ],
@@ -61,32 +82,17 @@ class _LanguageCardState extends State<LanguageCard> {
 
           const SizedBox(height: 10),
 
-          const Text(
-            "Select your preferred language for the interface.",
-            style: TextStyle(color: Colors.grey, fontSize: 13),
+          Text(
+            "select language".tr(), // ✅ الترجمة السحرية
+            style: TextStyle(
+              color: isDark ? Colors.grey.shade400 : Colors.grey,
+              fontSize: 13,
+            ),
           ),
 
           const SizedBox(height: 20),
 
-          TextField(
-            decoration: InputDecoration(
-              hintText: "Search languages...",
-              prefixIcon: const Icon(Icons.search, color: Colors.grey),
-              filled: true,
-              fillColor: const Color(0xffF8FAFC),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
-                borderSide: const BorderSide(color: Color(0xffE2E8F0)),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
-                borderSide: const BorderSide(color: Color(0xffE2E8F0)),
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 15),
-
+          // ✅ اختصرنا القائمة لتشمل العربية والإنجليزية فقط
           Flexible(
             child: ListView(
               shrinkWrap: true,
@@ -94,10 +100,6 @@ class _LanguageCardState extends State<LanguageCard> {
               children: [
                 _buildLanguageOption("English", "English", "EN"),
                 _buildLanguageOption("Arabic", "العربية", "AR"),
-                _buildLanguageOption("French", "Français", "FR"),
-                _buildLanguageOption("German", "Deutsch", "DE"),
-                _buildLanguageOption("Spanish", "Español", "ES"),
-                _buildLanguageOption("Turkish", "Türkçe", "TR"),
               ],
             ),
           ),
@@ -109,16 +111,30 @@ class _LanguageCardState extends State<LanguageCard> {
             children: [
               TextButton(
                 onPressed: () {
-                  setState(() => selectedLanguage = "Arabic");
+                  setState(
+                    () => selectedLanguage = context.locale.languageCode == 'ar'
+                        ? 'Arabic'
+                        : 'English',
+                  );
                 },
-                child: const Text(
-                  "Reset",
-                  style: TextStyle(color: Colors.black54, fontSize: 16),
+                child: Text(
+                  "reset".tr(), // ✅ الترجمة السحرية
+                  style: TextStyle(
+                    color: isDark ? Colors.grey.shade400 : Colors.black54,
+                    fontSize: 16,
+                  ),
                 ),
               ),
               ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
+                onPressed: () async {
+                  // ✅ تغيير اللغة فعلياً بسطر واحد!
+                  if (selectedLanguage == "Arabic") {
+                    await context.setLocale(const Locale('ar'));
+                  } else {
+                    await context.setLocale(const Locale('en'));
+                  }
+
+                  if (context.mounted) Navigator.pop(context);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xff2563EB),
@@ -132,9 +148,9 @@ class _LanguageCardState extends State<LanguageCard> {
                   ),
                   elevation: 0,
                 ),
-                child: const Text(
-                  "Save Changes",
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                child: Text(
+                  "save_changes".tr(), // ✅ الترجمة السحرية
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
             ],

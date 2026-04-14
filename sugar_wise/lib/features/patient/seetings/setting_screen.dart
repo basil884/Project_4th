@@ -1,6 +1,7 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sugar_wise/features/patient/appearance_theme/apperance_screen.dart';
+import 'package:sugar_wise/features/patient/appearance_theme/view/apperance_screen.dart';
 import 'package:sugar_wise/features/patient/helpsupport/helpsupport_screen.dart';
 import 'package:sugar_wise/features/patient/language_screen/view/language_screen.dart';
 import 'package:sugar_wise/features/patient/mobile_billing_plans/view/biling_extends.dart';
@@ -20,25 +21,33 @@ class SettingsScreenPatient extends StatelessWidget {
     // ✅ نقرأ العقل المدبر الخاص بالإعدادات مباشرة (لأنه موجود الآن في main.dart)
     final viewModel = Provider.of<SettingsViewModel>(context);
 
+    // 🔥 استخراج حالة ولون الثيم
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor =
+        Theme.of(context).textTheme.bodyLarge?.color ??
+        (isDark ? Colors.white : Colors.black87);
+
     return Scaffold(
-      backgroundColor: const Color(0xffF8F9FA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back,
-            color: Color(0xFFE64A19),
-            size: 22,
+          icon: Icon(
+            Icons.arrow_back_ios_new, // سهم أفضل
+            color: isDark
+                ? Colors.white
+                : const Color(0xFFE64A19), // لون متجاوب
+            size: 20,
           ),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          "Settings",
+        title: Text(
+          "Settings".tr(),
           style: TextStyle(
-            color: Colors.black87,
+            color: textColor, // ✅ يتغير حسب الثيم
             fontWeight: FontWeight.bold,
-            fontSize: 18,
+            fontSize: 20,
           ),
         ),
         centerTitle: false,
@@ -49,20 +58,18 @@ class SettingsScreenPatient extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const _SectionHeader(title: "ACCOUNT & SECURITY"),
+              _SectionHeader(title: "ACCOUNT & SECURITY".tr()),
               _CustomSettingsItem(
                 icon: Icons.person_outline,
                 iconColor: Colors.blue,
                 iconBgColor: Colors.blue.withValues(alpha: 0.1),
-                title: "Edit Profile",
+                title: "Edit Profile".tr(),
                 isSelected: viewModel.selectedIndex == 0,
                 onTap: () => viewModel.selectItem(0, () {
-                  // ✅ جلب عقل البروفايل (ProfileViewModel) من التطبيق وإرساله للشاشة
                   final profileViewModel = Provider.of<ProfileViewModel>(
                     context,
                     listen: false,
                   );
-
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -76,12 +83,15 @@ class SettingsScreenPatient extends StatelessWidget {
                 icon: Icons.notifications_none_outlined,
                 iconColor: Colors.orange,
                 iconBgColor: Colors.orange.withValues(alpha: 0.1),
-                title: "Notifications",
+                title: "Notifications".tr(),
                 isSelected: viewModel.selectedIndex == 1,
                 onTap: () => viewModel.selectItem(1, () {
+                  // تأكد من استدعاء الشاشة الصحيحة (NotificationsView التي صممناها سابقاً)
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => Notifications()),
+                    MaterialPageRoute(
+                      builder: (context) => NotificationsEdit(),
+                    ),
                   );
                 }),
               ),
@@ -89,7 +99,7 @@ class SettingsScreenPatient extends StatelessWidget {
                 icon: Icons.security_outlined,
                 iconColor: Colors.green,
                 iconBgColor: Colors.green.withValues(alpha: 0.1),
-                title: "Security Settings",
+                title: "Security Settings".tr(),
                 isSelected: viewModel.selectedIndex == 2,
                 onTap: () => viewModel.selectItem(2, () {
                   Navigator.push(
@@ -102,12 +112,12 @@ class SettingsScreenPatient extends StatelessWidget {
               ),
 
               const SizedBox(height: 24),
-              const _SectionHeader(title: "PREFERENCES"),
+              _SectionHeader(title: "PREFERENCES".tr()),
               _CustomSettingsItem(
                 icon: Icons.account_balance_wallet_outlined,
                 iconColor: Colors.purple,
                 iconBgColor: Colors.purple.withValues(alpha: 0.1),
-                title: "Billing & Plans",
+                title: "Billing & Plans".tr(),
                 isSelected: viewModel.selectedIndex == 3,
                 onTap: () => viewModel.selectItem(3, () {
                   Navigator.push(
@@ -120,7 +130,7 @@ class SettingsScreenPatient extends StatelessWidget {
                 icon: Icons.color_lens_outlined,
                 iconColor: Colors.pink,
                 iconBgColor: Colors.pink.withValues(alpha: 0.1),
-                title: "Appearance & Theme",
+                title: "Appearance & Theme".tr(),
                 isSelected: viewModel.selectedIndex == 4,
                 onTap: () => viewModel.selectItem(4, () {
                   Navigator.push(
@@ -133,7 +143,7 @@ class SettingsScreenPatient extends StatelessWidget {
                 icon: Icons.language_outlined,
                 iconColor: Colors.blueAccent,
                 iconBgColor: Colors.blueAccent.withValues(alpha: 0.1),
-                title: "Language Settings",
+                title: "Language Settings".tr(),
                 isSelected: viewModel.selectedIndex == 5,
                 onTap: () => viewModel.selectItem(5, () {
                   Navigator.push(
@@ -144,12 +154,12 @@ class SettingsScreenPatient extends StatelessWidget {
               ),
 
               const SizedBox(height: 24),
-              const _SectionHeader(title: "SUPPORT"),
+              _SectionHeader(title: "SUPPORT".tr()),
               _CustomSettingsItem(
                 icon: Icons.help_outline,
                 iconColor: Colors.orangeAccent,
                 iconBgColor: Colors.orangeAccent.withValues(alpha: 0.1),
-                title: "Help & Support",
+                title: "Help & Support".tr(),
                 isSelected: viewModel.selectedIndex == 6,
                 onTap: () => viewModel.selectItem(6, () {
                   Navigator.push(
@@ -162,12 +172,15 @@ class SettingsScreenPatient extends StatelessWidget {
               ),
 
               const SizedBox(height: 30),
-              _buildLogoutButton(context, viewModel),
+              _buildLogoutButton(context, viewModel, isDark),
               const SizedBox(height: 20),
               Center(
                 child: Text(
-                  "App Version 1.0.0",
-                  style: TextStyle(color: Colors.grey.shade400, fontSize: 12),
+                  "App Version 1.0.0".tr(),
+                  style: TextStyle(
+                    color: isDark ? Colors.grey[600] : Colors.grey.shade500,
+                    fontSize: 12,
+                  ),
                 ),
               ),
               const SizedBox(height: 30),
@@ -178,7 +191,11 @@ class SettingsScreenPatient extends StatelessWidget {
     );
   }
 
-  Widget _buildLogoutButton(BuildContext context, SettingsViewModel viewModel) {
+  Widget _buildLogoutButton(
+    BuildContext context,
+    SettingsViewModel viewModel,
+    bool isDark,
+  ) {
     return InkWell(
       onTap: () => viewModel.logout(context),
       borderRadius: BorderRadius.circular(16),
@@ -186,18 +203,29 @@ class SettingsScreenPatient extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: Colors.red.withValues(alpha: 0.05),
+          color: isDark
+              ? Colors.red.withValues(alpha: 0.15)
+              : Colors.red.withValues(
+                  alpha: 0.08,
+                ), // ✅ جعلناه أوضح في الثيم المظلم
           borderRadius: BorderRadius.circular(16),
+          border: isDark
+              ? Border.all(color: Colors.red.withValues(alpha: 0.3))
+              : null, // إطار خفيف لبروز الزر
         ),
-        child: const Row(
+        child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.logout, color: Color(0xFFE53935), size: 20),
-            SizedBox(width: 10),
+            Icon(
+              Icons.logout,
+              color: isDark ? Colors.redAccent : const Color(0xFFE53935),
+              size: 20,
+            ),
+            const SizedBox(width: 10),
             Text(
-              "Logout",
+              "Logout".tr(),
               style: TextStyle(
-                color: Color(0xFFE53935),
+                color: isDark ? Colors.redAccent : const Color(0xFFE53935),
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
               ),
@@ -228,15 +256,25 @@ class _CustomSettingsItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 🔥 استخراج ألوان الثيم
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final Color defaultTextColor = isDark ? Colors.white : Colors.black87;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: isSelected ? const Color(0xff2F66D0) : Colors.white,
+        color: isSelected
+            ? const Color(0xff2F66D0)
+            : Theme.of(context).cardColor, // ✅ لون الكارد يتغير حسب الثيم
         borderRadius: BorderRadius.circular(16),
+        border: isDark && !isSelected
+            ? Border.all(color: Colors.grey.shade800)
+            : null, // إطار خفيف للمظلم
         boxShadow: [
-          if (!isSelected)
+          if (!isSelected &&
+              !isDark) // ✅ إخفاء الظل في الوضع المظلم لأنه غير مناسب
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.02),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -263,7 +301,9 @@ class _CustomSettingsItem extends StatelessWidget {
         title: Text(
           title,
           style: TextStyle(
-            color: isSelected ? Colors.white : Colors.black87,
+            color: isSelected
+                ? Colors.white
+                : defaultTextColor, // ✅ لون النص يتغير بذكاء
             fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
             fontSize: 15,
           ),
@@ -271,7 +311,9 @@ class _CustomSettingsItem extends StatelessWidget {
         trailing: Icon(
           Icons.arrow_forward_ios,
           size: 14,
-          color: isSelected ? Colors.white : Colors.grey.shade400,
+          color: isSelected
+              ? Colors.white
+              : (isDark ? Colors.grey.shade600 : Colors.grey.shade400),
         ),
       ),
     );
@@ -284,13 +326,18 @@ class _SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 🔥 لون نص العناوين الفرعية
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 12, top: 10),
       child: Text(
         title,
         style: TextStyle(
           fontWeight: FontWeight.bold,
-          color: Colors.black.withValues(alpha: 0.9),
+          color: isDark
+              ? Colors.grey.shade400
+              : Colors.black.withValues(alpha: 0.8), // ✅ لون هادئ للوضع المظلم
           fontSize: 12,
           letterSpacing: 0.5,
         ),

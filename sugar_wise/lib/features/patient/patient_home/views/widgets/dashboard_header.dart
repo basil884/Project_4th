@@ -47,7 +47,7 @@ class DashboardHeader extends StatelessWidget {
               ),
               const SizedBox(width: 10),
               Text(
-                patient.name, // ✅ تقرأ الاسم الحي (سيتغير فور التعديل)
+                (patient.name), // ✅ تقرأ الاسم الحي (سيتغير فور التعديل)
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
@@ -63,8 +63,8 @@ class DashboardHeader extends StatelessWidget {
           children: [
             // اللوجو (استبدل المسار بصورة اللوجو الخاصة بك)
             Image.asset(
-              'assets/images/logo/logo.png',
-              height: 70,
+              'assets/images/logo/logoText.png',
+              height: 40,
               errorBuilder: (c, e, s) => const Text("Sugar Wise"),
             ),
           ],

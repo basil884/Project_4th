@@ -99,7 +99,7 @@ class PatientRegistrationViewModel extends ChangeNotifier {
   void submitRegistration(BuildContext context) {
     FocusManager.instance.primaryFocus?.unfocus();
     if (formKeyStep4.currentState!.validate()) {
-      print("🚀 Registration Complete!");
+      // print("🚀 Registration Complete!");
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(

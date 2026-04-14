@@ -43,7 +43,7 @@ class DashboardViewModel extends ChangeNotifier {
     ),
     DashboardCardModel(
       movescreen: InsulCalculatorPatient(),
-      title: "Insulin Calculator",
+      title: ("Insulin Calculator"),
       description: "Manage meal plans and calculate insulin units for food.",
       smallIcon: Icons.restaurant_outlined,
       largeIcon: Icons.flatware_outlined,
