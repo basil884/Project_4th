@@ -6,7 +6,7 @@ import 'package:sugar_wise/features/patient/helpsupport/helpsupport_screen.dart'
 import 'package:sugar_wise/features/patient/language_screen/view/language_screen.dart';
 import 'package:sugar_wise/features/patient/mobile_billing_plans/view/biling_extends.dart';
 // تأكد من صحة هذه المسارات لديك
-import 'package:sugar_wise/features/patient/notfications/notifactions_edit/view/notifaction_edit.dart';
+import 'package:sugar_wise/features/patient/notfications_patient/notifactions_edit/view/notifaction_edit.dart';
 import 'package:sugar_wise/features/patient/patient_profile/edit_profile_patient/edit_profile_patient.dart';
 import 'package:sugar_wise/features/patient/seetings/securty_set/securty_seting_patient.dart';
 import 'package:sugar_wise/features/patient/seetings/settings_view_model.dart';

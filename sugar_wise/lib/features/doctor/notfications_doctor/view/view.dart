@@ -1,10 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sugar_wise/features/patient/notfications/notfication/model/notification_model.dart';
-import 'package:sugar_wise/features/patient/notfications/notfication/view_model/notifications_view_model.dart';
+import 'package:sugar_wise/features/doctor/notfications_doctor/model/model.dart';
+import 'package:sugar_wise/features/doctor/notfications_doctor/view_model/view_model.dart';
 
 class NotificationsView extends StatelessWidget {
   const NotificationsView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+      create: (_) => NotificationsViewModel(),
+      // 🔥 السحر هنا: ننتقل إلى Widget جديد كلياً (Body) لكي يولد لنا Context جديد
+      child: const _NotificationsBody(),
+    );
+  }
+}
+
+class _NotificationsBody extends StatelessWidget {
+  const _NotificationsBody();
 
   @override
   Widget build(BuildContext context) {

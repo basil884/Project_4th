@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:sugar_wise/core/custom_text_field.dart';
+import 'package:sugar_wise/features/auth/forgot_password/view/forgot_password_view.dart';
 import 'package:sugar_wise/features/auth/register/ask_registration/views/register_view.dart';
 import 'package:sugar_wise/features/auth/signin/view_models/login_view_model.dart';
+import 'package:sugar_wise/features/doctor/doctor_dashboard/view/doctor_dashboard.dart';
+import 'package:sugar_wise/features/doctor/doctor_view_patient/view/doctor_view_patient.dart';
 import 'package:sugar_wise/features/patient/bluetooth_scanner/view/connect_sensor_view.dart';
 
 class LoginForm extends StatefulWidget {
@@ -92,7 +95,7 @@ class _LoginFormState extends State<LoginForm> {
             hintText: "••••••••",
             prefixIcon: Icons.lock_outline,
             isPassword: true,
-            obscureText: viewModel.obscurePassword,
+            obscureText: !viewModel.isPasswordVisible,
             onSuffixTap: viewModel.togglePasswordVisibility,
           ),
           const SizedBox(height: 10),
@@ -134,7 +137,14 @@ class _LoginFormState extends State<LoginForm> {
                 ],
               ),
               TextButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ForgotPasswordView(),
+                    ),
+                  );
+                },
                 child: const Text(
                   "Forgot password?",
                   style: TextStyle(
@@ -177,20 +187,15 @@ class _LoginFormState extends State<LoginForm> {
                       if (!context.mounted) return;
 
                       // 2. إذا نجح الدخول، نقوم بتفعيل أو إلغاء "تذكرني"
-                      if (role != null) {
-                        if (_rememberMe) {
-                          await _secureStorage.write(
-                            key: 'email',
-                            value: email,
-                          );
-                          await _secureStorage.write(
-                            key: 'password',
-                            value: password,
-                          );
-                        } else {
-                          await _secureStorage.delete(key: 'email');
-                          await _secureStorage.delete(key: 'password');
-                        }
+                      if (_rememberMe) {
+                        await _secureStorage.write(key: 'email', value: email);
+                        await _secureStorage.write(
+                          key: 'password',
+                          value: password,
+                        );
+                      } else {
+                        await _secureStorage.delete(key: 'email');
+                        await _secureStorage.delete(key: 'password');
                       }
 
                       // 3. التوجيه
@@ -207,18 +212,7 @@ class _LoginFormState extends State<LoginForm> {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const Scaffold(
-                              body: Center(
-                                child: Text(
-                                  "👨‍⚕️ Doctor Dashboard\n(Coming Soon!)",
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ),
+                            builder: (context) => const DoctorDashboard(),
                           ),
                         );
                       } else {
@@ -258,6 +252,52 @@ class _LoginFormState extends State<LoginForm> {
                       ),
                     ),
             ),
+          ),
+          Divider(
+            color: isDark ? Colors.grey.shade800 : Colors.grey[300],
+            thickness: 1,
+          ),
+          Row(
+            mainAxisAlignment: .spaceAround,
+            children: [
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryGreen,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                onPressed: () {},
+                child: Row(
+                  children: [
+                    const Text("Google", style: TextStyle(color: Colors.white)),
+                    const Icon(
+                      Icons.g_mobiledata,
+                      color: Colors.white,
+                      size: 30,
+                    ),
+                  ],
+                ),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryGreen,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                onPressed: () {},
+                child: Row(
+                  children: [
+                    const Text(
+                      "Facebook",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    const Icon(Icons.facebook, color: Colors.white, size: 20),
+                  ],
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 25),
           // Divider (OR)

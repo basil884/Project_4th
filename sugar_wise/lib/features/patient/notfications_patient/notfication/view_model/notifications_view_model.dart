@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sugar_wise/features/patient/notfications/notfication/model/notification_model.dart';
+import 'package:sugar_wise/features/patient/notfications_patient/notfication/model/notification_model.dart';
 
 class NotificationsViewModel extends ChangeNotifier {
   // التبويب الافتراضي

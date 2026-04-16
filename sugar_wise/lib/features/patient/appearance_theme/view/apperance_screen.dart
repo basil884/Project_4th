@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sugar_wise/features/patient/appearance_theme/view/apperance_card.dart';
 import 'package:sugar_wise/features/patient/appearance_theme/model/apperance_models.dart';
-import 'package:sugar_wise/features/patient/notfications/notifactions_edit/view/notifaction_edit.dart';
+import 'package:sugar_wise/features/patient/notfications_patient/notifactions_edit/view/notifaction_edit.dart';
 
 class AppearanceScreen extends StatelessWidget {
   const AppearanceScreen({super.key});

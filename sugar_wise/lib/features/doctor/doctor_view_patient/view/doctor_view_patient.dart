@@ -3,14 +3,14 @@ import 'package:sugar_wise/features/doctor/doctor_view_patient/doctor_card.dart'
 import 'package:sugar_wise/features/doctor/doctor_view_patient/view_models/doctors_view_modle.dart';
 import 'package:sugar_wise/features/doctor/doctor_view_patient/model/doctor_model.dart';
 
-class DoctorView extends StatefulWidget {
-  const DoctorView({super.key});
+class DoctorViewToPatient extends StatefulWidget {
+  const DoctorViewToPatient({super.key});
 
   @override
-  State<DoctorView> createState() => _DoctorViewState();
+  State<DoctorViewToPatient> createState() => _DoctorViewToPatientState();
 }
 
-class _DoctorViewState extends State<DoctorView> {
+class _DoctorViewToPatientState extends State<DoctorViewToPatient> {
   String searchQuery = '';
   String selectedSpecialty = 'All Specialties';
 

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sugar_wise/features/patient/notfications/notifactions_edit/model/model_notifaction_edit.dart';
+import 'package:sugar_wise/features/patient/notfications_patient/notifactions_edit/model/model_notifaction_edit.dart';
 
 class NotificationsEdit extends StatefulWidget {
   const NotificationsEdit({super.key});

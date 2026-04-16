@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sugar_wise/features/auth/register/doctor_registration/view/create_doctor_step1_view.dart';
 import 'package:sugar_wise/features/auth/register/views/patient_registration_view.dart';
 import '../view_models/register_view_model.dart';
 import 'widgets/account_type_card.dart';
@@ -150,6 +151,13 @@ class _RegisterContent extends StatelessWidget {
                               ),
                             );
                           } else {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const CreateDoctorStep1View(),
+                              ),
+                            );
                             // print("Go to Doctor Registration");
                           }
                         }

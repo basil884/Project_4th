@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sugar_wise/features/doctor/doctor_view_patient/view/doctor_view.dart';
+import 'package:sugar_wise/features/doctor/doctor_view_patient/view/doctor_view_patient.dart';
 import 'package:sugar_wise/features/patient/insulin_calculator_patient/view/insulin_calculator_patient.dart';
 import 'package:sugar_wise/features/patient/laptests/view/lab_tests_view.dart';
 import 'package:sugar_wise/features/patient/monitoring_patient/view/monitoring_view.dart';
@@ -18,7 +18,7 @@ class DashboardViewModel extends ChangeNotifier {
   // بيانات الكروت
   final List<DashboardCardModel> cards = [
     DashboardCardModel(
-      movescreen: const DoctorView(),
+      movescreen: const DoctorViewToPatient(),
       title: "My Doctors",
       description: "Consult with your healthcare providers and specialists.",
       smallIcon: Icons.medical_services_outlined,

@@ -163,7 +163,7 @@ class _RegistrationContent extends StatelessWidget {
               Expanded(
                 child: _buildTextField(
                   label: "First Name *",
-                  hint: "John",
+                  hint: "Basil",
                   controller: viewModel.firstNameCtrl,
                   isDark: isDark,
                 ),
@@ -296,7 +296,7 @@ class _RegistrationContent extends StatelessWidget {
           const SizedBox(height: 24),
           _buildTextField(
             label: "Email Address *",
-            hint: "john.doe@example.com",
+            hint: "Basil.doe@example.com",
             controller: viewModel.emailCtrl,
             keyboardType: TextInputType.emailAddress,
             prefixIcon: Icons.email_outlined,
