@@ -287,6 +287,16 @@ class _AddClinicViewState extends State<AddClinicView> {
                 children: [
                   // صورة ثابتة للخريطة (بدون أي مكاتب أو تفاعل يسبب انهيار)
                   Image.network(
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      width: 100,
+                      height: 100,
+                      color: Colors.white24,
+                      child: const Icon(
+                        Icons.person,
+                        size: 50,
+                        color: Colors.white54,
+                      ),
+                    ),
                     "https://media.wired.com/photos/59269cd37034dc5f91bec0f1/master/pass/GoogleMapTA.jpg",
                     fit: BoxFit.cover,
                   ),

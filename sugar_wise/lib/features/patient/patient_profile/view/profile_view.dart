@@ -74,19 +74,6 @@ class ProfileView extends StatelessWidget {
           ),
 
           // 2. ✅ زر الرجوع العائم الأنيق
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 10.0, left: 15.0),
-              child: IconButton(
-                icon: const Icon(
-                  Icons.arrow_back_ios_new,
-                  color: Colors.white,
-                  size: 20,
-                ),
-                onPressed: () => Navigator.pop(context),
-              ),
-            ),
-          ),
         ],
       ),
     );

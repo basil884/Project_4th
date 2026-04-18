@@ -87,7 +87,9 @@ class _ConnectSensorViewState extends State<ConnectSensorView>
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => PatientMain()),
+                      MaterialPageRoute(
+                        builder: (context) => PatientMainLayout(),
+                      ),
                     );
                   },
                   child: Text('Demo Entry'),

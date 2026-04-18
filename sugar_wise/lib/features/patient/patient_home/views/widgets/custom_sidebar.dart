@@ -1,0 +1,344 @@
+import 'package:flutter/material.dart';
+import 'package:sugar_wise/features/auth/signin/views/login_view.dart';
+import 'package:sugar_wise/features/doctor/doctor_view_patient/view/doctor_view_patient.dart';
+import 'package:sugar_wise/features/patient/insulin_calculator_patient/view/insulin_calculator_patient.dart';
+import 'package:sugar_wise/features/patient/orders/view/orders_view.dart';
+import 'package:sugar_wise/features/patient/patient_home/views/widgets/health_metric_card.dart';
+import 'package:sugar_wise/features/patient/patient_profile/view/profile_view.dart';
+import 'package:sugar_wise/features/patient/patient_profile/view_models/profile_view_model.dart';
+import 'package:sugar_wise/features/patient/seetings/setting_screen.dart';
+
+class CustomSidebar extends StatelessWidget {
+  CustomSidebar({super.key});
+  ProfileViewModel profileViewModel = ProfileViewModel();
+
+  @override
+  Widget build(BuildContext context) {
+    // عرض 75% من الشاشة كما طلبنا في التصميم الأول
+    final screenWidth = MediaQuery.of(context).size.width;
+    const Color primaryTeal = Color(
+      0xFF28B5B5,
+    ); // اللون المميز للتصميم الأول (Teal)
+
+    return Drawer(
+      width: screenWidth * 0.75,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.horizontal(right: Radius.circular(30)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ==========================================
+          // 1. الهيدر (تصميم 1 + بيانات 2)
+          // ==========================================
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.only(
+              top: 60,
+              left: 20,
+              bottom: 20,
+              right: 20,
+            ),
+            decoration: const BoxDecoration(
+              color: Color(0xFFE0F7FA), // الخلفية السيان الفاتحة المريحة
+              borderRadius: BorderRadius.only(topRight: Radius.circular(30)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Stack(
+                  alignment: Alignment.bottomRight,
+                  children: [
+                    const CircleAvatar(
+                      radius: 35,
+                      backgroundColor: Colors.white,
+                      backgroundImage: NetworkImage(
+                        "https://i.pravatar.cc/150?img=11",
+                      ), // صورة المريض
+                    ),
+                    // نقطة الأونلاين الخضراء من الصورة الثانية
+                    Container(
+                      width: 16,
+                      height: 16,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF10B981),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 2.5),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 15),
+                Text(
+                  ProfileViewModel().patientData.name,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1F2937),
+                  ),
+                ),
+                const Text(
+                  "PATIENT",
+                  style: TextStyle(
+                    color: primaryTeal,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 10),
+
+          // ==========================================
+          // 2. عناصر القائمة (تصميم 1 + بيانات 2)
+          // ==========================================
+          Expanded(
+            child: Theme(
+              data: Theme.of(
+                context,
+              ).copyWith(dividerColor: Colors.transparent),
+              child: ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  _buildDrawerItem(
+                    context,
+                    Icons.home_filled,
+                    "Home",
+                    isSelected: true,
+                    onTap: () {
+                      Navigator.pop(context); // إغلاق السايدبار
+                    },
+                  ),
+                  _buildDrawerItem(
+                    context,
+                    Icons.monitor_heart_outlined,
+                    "My Health",
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const HealthMetricView(),
+                      ),
+                    ),
+                  ),
+                  _buildDrawerItem(
+                    context,
+                    Icons.person_outline,
+                    "Profile",
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ProfileView(),
+                      ),
+                    ),
+                  ),
+                  _buildDrawerItem(
+                    context,
+                    Icons.shopping_bag_outlined,
+                    "Shop",
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const OrdersView(),
+                      ),
+                    ),
+                  ),
+                  _buildDrawerItem(
+                    context,
+                    Icons.health_and_safety_outlined,
+                    "Top Doctors",
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const DoctorViewToPatient(),
+                      ),
+                    ),
+                  ),
+                  _buildDrawerItem(
+                    context,
+                    Icons.water_drop_outlined,
+                    "Insulin Units",
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const InsulCalculatorPatient(),
+                      ),
+                    ),
+                  ),
+                  _buildDrawerItem(context, Icons.article_outlined, "Blog"),
+
+                  const SizedBox(height: 5),
+
+                  // القوائم المنسدلة مصممة لتتماشى مع الهوية
+                  _buildExpandableSection(Icons.business_outlined, "Company", [
+                    "About Us",
+                    "Our Mission",
+                    "Careers",
+                    "Press & Media",
+                    "Contact Us",
+                    "Blog",
+                  ]),
+                  _buildExpandableSection(
+                    Icons.menu_book_outlined,
+                    "Resources",
+                    ["Monitoring Tools", "Educational Games", "FAQs"],
+                  ),
+                  _buildExpandableSection(Icons.gavel_outlined, "Legal", [
+                    "Terms Of Service",
+                    "Privacy policy",
+                    "Medical Disclaimer",
+                    "Cookie Policy",
+                    "Compliance",
+                    "Data Protections",
+                  ]),
+                ],
+              ),
+            ),
+          ),
+
+          // ==========================================
+          // 3. الفوتر (Primary Navigation)
+          // ==========================================
+          const Divider(color: Colors.black12),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 30, top: 5),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.only(left: 20, bottom: 10, top: 5),
+                  child: Text(
+                    "PRIMARY NAVIGATION",
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+                _buildDrawerItem(
+                  context,
+                  Icons.settings_outlined,
+                  "Settings",
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SettingsScreenPatient(),
+                    ),
+                  ),
+                ),
+                _buildDrawerItem(
+                  context,
+                  Icons.logout,
+                  "Logout",
+                  isLogout: true,
+                  onTap: () {
+                    // هنا يمكنك إضافة منطق تسجيل الخروج الخاص بك
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const LoginView(),
+                      ),
+                      (route) => false,
+                    ); // إغلاق السايدبار
+                  },
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ==================== [ دوال مساعدة لرسم العناصر ] ====================
+
+  Widget _buildDrawerItem(
+    BuildContext context,
+    IconData icon,
+    String title, {
+    bool isSelected = false,
+    bool isLogout = false,
+    void Function()? onTap,
+  }) {
+    const Color primaryTeal = Color(0xFF257BF4);
+
+    return Container(
+      margin: const EdgeInsets.only(
+        right: 20,
+        bottom: 5,
+      ), // حواف دائرية من اليمين فقط كما في التصميم الأول
+      decoration: BoxDecoration(
+        color: isSelected
+            ? primaryTeal.withValues(alpha: 0.1)
+            : Colors.transparent,
+        borderRadius: const BorderRadius.horizontal(right: Radius.circular(20)),
+      ),
+      child: ListTile(
+        leading: Icon(
+          icon,
+          color: isLogout
+              ? Colors.redAccent
+              : (isSelected ? primaryTeal : Colors.black54),
+          size: 24,
+        ),
+        title: Text(
+          title,
+          style: TextStyle(
+            color: isLogout
+                ? Colors.redAccent
+                : (isSelected ? primaryTeal : Colors.black87),
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+            fontSize: 15,
+          ),
+        ),
+        onTap: onTap,
+      ),
+    );
+  }
+
+  Widget _buildExpandableSection(
+    IconData icon,
+    String title,
+    List<String> children,
+  ) {
+    return Container(
+      margin: const EdgeInsets.only(right: 20),
+      child: ExpansionTile(
+        leading: Icon(icon, color: Colors.black54, size: 24),
+        title: Text(
+          title,
+          style: const TextStyle(
+            color: Colors.black87,
+            fontWeight: FontWeight.w500,
+            fontSize: 15,
+          ),
+        ),
+        iconColor: const Color(0xFF28B5B5), // تلوين الأيقونة بالسيان عند الفتح
+        collapsedIconColor: Colors.black54,
+        childrenPadding: const EdgeInsets.only(left: 55, bottom: 10),
+        expandedCrossAxisAlignment: CrossAxisAlignment.start,
+        children: children.map((childText) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: GestureDetector(
+              onTap: () {},
+              child: Text(
+                childText,
+                style: const TextStyle(
+                  color: Colors.grey,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+}

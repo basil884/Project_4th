@@ -193,7 +193,7 @@ class BluetoothScannerViewModel extends ChangeNotifier {
           context,
           MaterialPageRoute(
             builder: (context) =>
-                const PatientMain(), // 🚨 تأكد من عمل import لملف PatientMain في الأعلى
+                const PatientMainLayout(), // 🚨 تأكد من عمل import لملف PatientMain في الأعلى
           ),
         );
       });

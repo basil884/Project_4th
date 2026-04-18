@@ -115,7 +115,7 @@ class MyApp extends StatelessWidget {
 
   Widget _getInitialScreen() {
     if (isLoggedIn && role != null) {
-      if (role == 'patient') return const PatientMain();
+      if (role == 'patient') return const PatientMainLayout();
 
       // 🔥 التعديل هنا: توجيه الدكتور للشاشة الرئيسية الأنيقة التي تحتوي على الـ Nav Bar
       if (role == 'doctor') return const DoctorDashboard();

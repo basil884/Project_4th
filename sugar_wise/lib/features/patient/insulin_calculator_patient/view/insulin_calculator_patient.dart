@@ -28,7 +28,23 @@ class _Insulin extends State<InsulCalculatorPatient> {
     final viewModel = Provider.of<InsulinViewModel>(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      appBar: AppBar(
+        title: Row(
+          children: [
+            Icon(Icons.calculate, color: Color(0xff2F66D0)),
+            const Text(
+              "Insulin Calculator",
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w900,
+                color: Color(0xFF1D2939),
+              ),
+            ),
+            CircleAvatar(radius: 18, backgroundColor: Colors.grey.shade200),
+          ],
+        ),
+        // backgroundColor: const Color(0xFF28B5B5),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
@@ -36,25 +52,6 @@ class _Insulin extends State<InsulCalculatorPatient> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 1. الهيدر
-              Row(
-                children: [
-                  const Icon(Icons.calculate, color: Color(0xff2F66D0)),
-                  const SizedBox(width: 8),
-                  const Text(
-                    "Insulin Calculator",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w900,
-                      color: Color(0xFF1D2939),
-                    ),
-                  ),
-                  const Spacer(),
-                  CircleAvatar(
-                    radius: 18,
-                    backgroundColor: Colors.grey.shade200,
-                  ),
-                ],
-              ),
               const SizedBox(height: 20),
 
               // 2. شريط البحث والفلتر الاحترافي 🔥
