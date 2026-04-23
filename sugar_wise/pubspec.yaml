@@ -64,6 +64,7 @@ dependencies:
   dotted_border: ^3.1.0
   dio: ^5.9.2
   latlong2: ^0.9.1
+  location: ^8.0.1
 
 
 dev_dependencies:

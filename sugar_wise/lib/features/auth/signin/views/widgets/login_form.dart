@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:sugar_wise/core/custom_text_field.dart';
+import 'package:sugar_wise/core/shared_prefs_helper/shared_prefs_helper.dart';
 import 'package:sugar_wise/features/auth/forgot_password/view/forgot_password_view.dart';
 import 'package:sugar_wise/features/auth/register/ask_registration/views/register_view.dart';
 import 'package:sugar_wise/features/auth/signin/view_models/login_view_model.dart';
@@ -193,9 +194,12 @@ class _LoginFormState extends State<LoginForm> {
                           key: 'password',
                           value: password,
                         );
+                        await SharedPrefsHelper.saveLoginState(true);
+                        await SharedPrefsHelper.saveUserRole(role!);
                       } else {
                         await _secureStorage.delete(key: 'email');
                         await _secureStorage.delete(key: 'password');
+                        await SharedPrefsHelper.logout();
                       }
 
                       // 3. التوجيه

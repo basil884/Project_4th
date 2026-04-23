@@ -97,12 +97,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sugar_wise/features/doctor/doctor_view_patient/view/doctor_view_patient.dart';
+import 'package:sugar_wise/features/patient/bluetooth_scanner/View_Models/bluetooth_scanner_view_model.dart';
 import 'package:sugar_wise/features/patient/bluetooth_scanner/view/connect_sensor_view.dart';
 import 'package:sugar_wise/features/patient/patient_home/models/dashboard_card_model.dart';
 import 'package:sugar_wise/features/patient/patient_home/views/widgets/health_metric_card.dart';
 import '../view_models/dashboard_view_model.dart';
 import 'widgets/dashboard_header.dart';
-import 'widgets/service_grid_card.dart';
 
 class PatientDashboardView extends StatelessWidget {
   const PatientDashboardView({super.key});
@@ -111,6 +111,7 @@ class PatientDashboardView extends StatelessWidget {
   Widget build(BuildContext context) {
     // جلب الـ ViewModel
     final viewModel = Provider.of<DashboardViewModel>(context);
+    final bluetoothVM = context.watch<BluetoothScannerViewModel>();
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20.0),
@@ -291,29 +292,40 @@ class PatientDashboardView extends StatelessWidget {
           Column(
             children: [
               // الصف الأول
+              // الصف الأول
               Row(
                 children: [
                   Expanded(
                     child: HealthMetricCard(
                       icon: Icons.favorite_border,
-                      iconColor: const Color(0xFFEF4444), // أحمر فاتح
-                      iconBgColor: const Color(0xFFFEE2E2), // أحمر شفاف
-                      value: "72",
+                      iconColor: const Color(0xFFEF4444),
+                      iconBgColor: const Color(0xFFFEE2E2),
+                      value: bluetoothVM.currentHeartRate == 0
+                          ? "--"
+                          : bluetoothVM.currentHeartRate.toString(),
                       unit: "bpm",
                       title: "Heart rate",
-                      status: "Normal",
-                      statusIcon: Icons.arrow_upward,
-                      statusColor: const Color(0xFF10B981), // أخضر
+                      status: bluetoothVM.currentHeartRate == 0
+                          ? "Waiting..."
+                          : "Live",
+                      statusIcon: bluetoothVM.currentHeartRate == 0
+                          ? Icons.sync
+                          : Icons.favorite,
+                      statusColor: bluetoothVM.currentHeartRate == 0
+                          ? Colors.grey
+                          : const Color(0xFFEF4444),
                     ),
                   ),
                   const SizedBox(width: 15),
                   Expanded(
                     child: HealthMetricCard(
-                      icon:
-                          Icons.water_drop_outlined, // أقرب أيقونة لجهاز السكر
-                      iconColor: const Color(0xFF3B82F6), // أزرق
-                      iconBgColor: const Color(0xFFDBEAFE), // أزرق شفاف
-                      value: "118",
+                      icon: Icons.water_drop_outlined,
+                      iconColor: const Color(0xFF3B82F6),
+                      iconBgColor: const Color(0xFFDBEAFE),
+                      // السكر لا يأتي من هذه الساعة، يمكننا تركه كقيمة ثابتة مؤقتاً أو ربطه
+                      value: bluetoothVM.currentGlucose == 0
+                          ? "118"
+                          : bluetoothVM.currentGlucose.toString(),
                       unit: "mg/dL",
                       title: "Blood glucose",
                       status: "Stable",
@@ -331,29 +343,37 @@ class PatientDashboardView extends StatelessWidget {
                   Expanded(
                     child: HealthMetricCard(
                       icon: Icons.monitor_heart_outlined,
-                      iconColor: const Color(0xFF0D9488), // Teal
-                      iconBgColor: const Color(0xFFCCFBF1), // Teal شفاف
-                      value: "120/80",
+                      iconColor: const Color(0xFF0D9488),
+                      iconBgColor: const Color(0xFFCCFBF1),
+                      // 🔥 ربط الضغط (إذا كان 0 نعرض "--/--")
+                      value: bluetoothVM.currentSystolic == 0
+                          ? "--/--"
+                          : "${bluetoothVM.currentSystolic}/${bluetoothVM.currentDiastolic}",
                       unit: "",
                       title: "Blood pressure",
-                      status: "Normal",
-                      statusColor: const Color(0xFF10B981),
+                      status: bluetoothVM.currentSystolic == 0
+                          ? "Connect to sync"
+                          : "Normal",
+                      statusColor: bluetoothVM.currentSystolic == 0
+                          ? Colors.grey
+                          : const Color(0xFF10B981),
                     ),
                   ),
                   const SizedBox(width: 15),
                   Expanded(
                     child: HealthMetricCard(
                       icon: Icons.access_time,
-                      iconColor: const Color(0xFFF59E0B), // برتقالي
-                      iconBgColor: const Color(0xFFFEF3C7), // برتقالي شفاف
-                      value: "7.2",
+                      iconColor: const Color(0xFFF59E0B),
+                      iconBgColor: const Color(0xFFFEF3C7),
+                      // 🔥 ربط النوم
+                      value: bluetoothVM.sleepHours == 0.0
+                          ? "--"
+                          : bluetoothVM.sleepHours.toString(),
                       unit: "hrs",
                       title: "Sleep last night",
-                      status: "Low",
-                      statusIcon: Icons.arrow_downward,
-                      statusColor: const Color(
-                        0xFF10B981,
-                      ), // أو يمكنك جعلها حمراء للتنبيه
+                      status: "Connect to sync",
+                      statusIcon: Icons.sync,
+                      statusColor: Colors.grey,
                     ),
                   ),
                 ],

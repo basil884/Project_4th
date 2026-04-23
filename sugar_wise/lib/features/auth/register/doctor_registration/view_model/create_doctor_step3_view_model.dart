@@ -5,7 +5,7 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 
 class CreateDoctorStep3ViewModel extends ChangeNotifier {
   // 🔥 ضع مفتاح الـ API الخاص بك هنا
-  final String apiKey = "";
+  final String apiKey = "AIzaSyDqxDwA-D__Z2q1Cmjw1nnRAw5ntHdg_Ms";
 
   // الحقول النصية والقائمة المنسدلة
   String _universityName = '';

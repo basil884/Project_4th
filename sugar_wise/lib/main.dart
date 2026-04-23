@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:easy_localization/easy_localization.dart'; // ✅ المكتبة السحرية
+import 'package:easy_localization/easy_localization.dart';
 import 'package:sugar_wise/core/api/api_client.dart';
-import 'package:sugar_wise/core/shared_prefs_helper/shared_prefs_helper.dart';
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:sugar_wise/features/doctor/doctor_dashboard/view/doctor_dashboard.dart';
 import 'package:sugar_wise/features/patient/bluetooth_scanner/View_Models/bluetooth_scanner_view_model.dart';
-
-// 🔥 استيرادات شاشات الدكتور الجديدة
 import 'package:sugar_wise/features/doctor/profile_doctor/doctor_profile/view_model/doctor_profile_view_model.dart';
-// --- استيرادات الـ ViewModels الخاصة بك ---
 import 'package:sugar_wise/features/patient/insulin_calculator_patient/view_model_insulin/view_model_insulin.dart';
 import 'package:sugar_wise/features/patient/laptests/lab_tests_view_model/lab_tests_view_model.dart';
 import 'package:sugar_wise/features/patient/monitoring_patient/view_model/monitoring_view_model.dart';
@@ -17,36 +13,27 @@ import 'package:sugar_wise/features/patient/notfications_patient/notfication/vie
 import 'package:sugar_wise/features/patient/orders/orders_view_model/orders_view_model.dart';
 import 'package:sugar_wise/features/patient/patient_profile/view_models/profile_view_model.dart';
 import 'package:sugar_wise/features/patient/seetings/settings_view_model.dart';
-
 import 'package:sugar_wise/features/splash/views/splash_screen.dart';
-import 'package:sugar_wise/features/patient/patient_home/views/patient_main_layout.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // تهيئة مكتبة الـ API (Dio) مرة واحدة في بداية التطبيق
   ApiClient.init();
-  // ✅ تهيئة مكتبة الترجمة
   await EasyLocalization.ensureInitialized();
 
+  // جلب الثيم فقط لأنه ضروري قبل بناء الـ MaterialApp لمنع وميض الشاشة
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
-  bool isLoggedIn = await SharedPrefsHelper.getLoginState();
-  String? role = await SharedPrefsHelper.getUserRole();
+
+  // 🔥 قمنا بحذف الـ SharedPrefs من هنا لتسريع فتح التطبيق!
 
   runApp(
-    // ✅ تغليف التطبيق بالكامل במكتبة الترجمة
     EasyLocalization(
       supportedLocales: const [Locale('en'), Locale('ar')],
-      path: 'assets/translations', // مسار ملفات الـ JSON
+      path: 'assets/translations',
       fallbackLocale: const Locale('en'),
       child: MultiProvider(
         providers: [
-          ChangeNotifierProvider(
-            create: (_) {
-              var profileViewModel = ProfileViewModel();
-              profileViewModel.loadProfileData();
-              return profileViewModel;
-            },
-          ),
+          // 🔥 تم إزالة loadProfileData من هنا ليتم استدعاؤها لاحقاً داخل الشاشة نفسها
+          ChangeNotifierProvider(create: (_) => ProfileViewModel()),
           ChangeNotifierProvider(create: (_) => SettingsViewModel()),
           ChangeNotifierProvider(create: (_) => InsulinViewModel()),
           ChangeNotifierProvider(create: (_) => MonitoringViewModel()),
@@ -54,31 +41,18 @@ void main() async {
           ChangeNotifierProvider(create: (_) => OrdersViewModel()),
           ChangeNotifierProvider(create: (_) => NotificationsViewModel()),
           ChangeNotifierProvider(create: (_) => BluetoothScannerViewModel()),
-
-          // 🔥 إضافة الـ ViewModel الخاص بالطبيب ليكون متاحاً في كامل التطبيق
           ChangeNotifierProvider(create: (_) => DoctorProfileViewModel()),
         ],
-        child: MyApp(
-          isLoggedIn: isLoggedIn,
-          role: role,
-          savedThemeMode: savedThemeMode,
-        ),
+        child: MyApp(savedThemeMode: savedThemeMode),
       ),
     ),
   );
 }
 
 class MyApp extends StatelessWidget {
-  final bool isLoggedIn;
-  final String? role;
   final AdaptiveThemeMode? savedThemeMode;
 
-  const MyApp({
-    super.key,
-    required this.isLoggedIn,
-    this.role,
-    this.savedThemeMode,
-  });
+  const MyApp({super.key, this.savedThemeMode});
 
   @override
   Widget build(BuildContext context) {
@@ -103,23 +77,12 @@ class MyApp extends StatelessWidget {
         title: 'Sugar Wise',
         theme: theme,
         darkTheme: darkTheme,
-
         localizationsDelegates: context.localizationDelegates,
         supportedLocales: context.supportedLocales,
         locale: context.locale,
-
-        home: _getInitialScreen(),
+        // 🔥 التطبيق يفتح دائماً وبشكل فوري على الـ Splash Screen!
+        home: const SplashScreen(),
       ),
     );
-  }
-
-  Widget _getInitialScreen() {
-    if (isLoggedIn && role != null) {
-      if (role == 'patient') return const PatientMainLayout();
-
-      // 🔥 التعديل هنا: توجيه الدكتور للشاشة الرئيسية الأنيقة التي تحتوي على الـ Nav Bar
-      if (role == 'doctor') return const DoctorDashboard();
-    }
-    return const SplashScreen();
   }
 }

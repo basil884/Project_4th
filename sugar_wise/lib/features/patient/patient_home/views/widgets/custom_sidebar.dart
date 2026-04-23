@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sugar_wise/features/auth/signin/views/login_view.dart';
 import 'package:sugar_wise/features/doctor/doctor_view_patient/view/doctor_view_patient.dart';
+import 'package:sugar_wise/features/patient/health_dashprod/health_dashprod.dart';
 import 'package:sugar_wise/features/patient/insulin_calculator_patient/view/insulin_calculator_patient.dart';
 import 'package:sugar_wise/features/patient/orders/view/orders_view.dart';
 import 'package:sugar_wise/features/patient/patient_home/views/widgets/health_metric_card.dart';
@@ -120,7 +121,7 @@ class CustomSidebar extends StatelessWidget {
                     onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const HealthMetricView(),
+                        builder: (context) => const HealthDashprod(),
                       ),
                     ),
                   ),
