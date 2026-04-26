@@ -4,14 +4,13 @@ import 'package:sugar_wise/features/doctor/doctor_view_patient/view/doctor_view_
 import 'package:sugar_wise/features/patient/health_dashprod/health_dashprod.dart';
 import 'package:sugar_wise/features/patient/insulin_calculator_patient/view/insulin_calculator_patient.dart';
 import 'package:sugar_wise/features/patient/orders/view/orders_view.dart';
-import 'package:sugar_wise/features/patient/patient_home/views/widgets/health_metric_card.dart';
 import 'package:sugar_wise/features/patient/patient_profile/view/profile_view.dart';
 import 'package:sugar_wise/features/patient/patient_profile/view_models/profile_view_model.dart';
 import 'package:sugar_wise/features/patient/seetings/setting_screen.dart';
 
 class CustomSidebar extends StatelessWidget {
   CustomSidebar({super.key});
-  ProfileViewModel profileViewModel = ProfileViewModel();
+  final ProfileViewModel profileViewModel = ProfileViewModel();
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +71,7 @@ class CustomSidebar extends StatelessWidget {
                 ),
                 const SizedBox(height: 15),
                 Text(
-                  ProfileViewModel().patientData.name,
+                  profileViewModel.patientData.name,
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,

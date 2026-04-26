@@ -1,30 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:sugar_wise/features/doctor/all_patient_to_doctor/view/my_patients_view.dart';
+import 'package:sugar_wise/features/doctor/chat_doctor/doctor_chats_to_patient/views/doctor_chats_view.dart';
 import 'package:sugar_wise/features/doctor/doctor_dashboard/view/doctor_dashboard.dart';
+import 'package:sugar_wise/features/doctor/profile_doctor/doctor_profile/view/doctor_profile_view.dart';
 import 'package:sugar_wise/features/doctor/notfications_doctor/view/view.dart';
-// import '../../all_patient_to_doctor/view/my_patients_view.dart';
-// import '../../notfications_doctor/view/view.dart';
-// import '../../profile_doctor/doctor_profile/view/doctor_profile_view.dart';
 
-// ملفات وهمية للشاشات التي لم تصمم بعد لتجربة الـ Nav
-class DoctorScheduleView extends StatelessWidget {
-  const DoctorScheduleView({super.key});
-  @override
-  Widget build(BuildContext context) =>
-      const Scaffold(body: Center(child: Text("Schedule Screen")));
-}
-
+// placeholder screens
+// Removed FavoritesView
 class DoctorChatView extends StatelessWidget {
   const DoctorChatView({super.key});
   @override
-  Widget build(BuildContext context) =>
-      const Scaffold(body: Center(child: Text("Chat Screen")));
-}
-
-class DoctorSettingsView extends StatelessWidget {
-  const DoctorSettingsView({super.key});
-  @override
-  Widget build(BuildContext context) =>
-      const Scaffold(body: Center(child: Text("Settings Screen")));
+  Widget build(BuildContext context) => PatientChatsView();
 }
 
 class HomeViewModel extends ChangeNotifier {
@@ -33,12 +19,10 @@ class HomeViewModel extends ChangeNotifier {
 
   // قائمة الشاشات التي سيتم التنقل بينها عبر الـ Bottom Nav
   final List<Widget> _screens = [
-    // 🔥 الشاشة الرئيسية الجديدة التي سنصممها في الخطوة الثالثة
     const DoctorHomeContent(),
-    const DoctorScheduleView(), // وهمية للتجربة
-    const DoctorChatView(), // وهمية للتجربة
-    const DoctorSettingsView(), // وهمية للتجربة
-    const NotificationsView(),
+    const MyPatientsView(), // Linked to real screen
+    const DoctorChatView(),
+    const DoctorProfileView(), // Linked to real screen
   ];
 
   List<Widget> get screens => _screens;
